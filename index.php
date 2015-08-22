@@ -3,11 +3,11 @@
  * @Author: huhuaquan
  * @Date:   2015-08-10 17:41:33
  * @Last Modified by:   hector
- * @Last Modified time: 2015-08-22 10:30:59
+ * @Last Modified time: 2015-08-22 23:38:29
  */
-require_once './phpSpider/curl.php';
-require_once './phpSpider/user.php';
-require_once './phpSpider/pdo_mysql.php';
+require_once './spider/curl.php';
+require_once './spider/user.php';
+require_once './spider/pdo_mysql.php';
 require_once './function.php';
 
 $curl = new Curl();
