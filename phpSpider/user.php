@@ -2,8 +2,8 @@
 /**
  * @Author: huhuaquan
  * @Date:   2015-08-21 15:25:27
- * @Last Modified by:   huhuaquan
- * @Last Modified time: 2015-08-21 17:11:43
+ * @Last Modified by:   hector
+ * @Last Modified time: 2015-08-22 09:15:39
  */
 class User {
 	private $u_id;
@@ -50,6 +50,8 @@ class User {
 
 	const TABLE_NAME = 'user';
 
+	const FOLLOW_TABLE_NAME = 'user_follow';
+
 	public function __set($property_name, $value)
 	{
 		$this->$property_name = $value;
@@ -60,20 +62,20 @@ class User {
 		return isset($this->$property_name) ? $this->$property_name : NULL;
 	}
 
-	public function existed($u_id)
+	public function existed($params, $table)
 	{
-		$params = array(
-			'where' => array(
-				'u_id' => $u_id
-			)
-		);
-		$result = PDO_MySQL::count(self::TABLE_NAME, $params);
+		$result = PDO_MySQL::count($table, $params);
 		return $result;
 	}
 
 	public function add()
 	{
-		if ($this->existed($this->u_id))
+		$existed_params = array(
+			'where' => array(
+				'u_id' => $this->u_id
+			)
+		);
+		if ($this->existed($existed_params, self::TABLE_NAME))
 		{
 			return;
 		}
@@ -114,5 +116,28 @@ class User {
 
 		$result = PDO_MySQL::getOneRow(self::TABLE_NAME, $params);
 		return $result;
+	}
+
+	public function addFollow($user_follow)
+	{
+		$existed_params = array(
+			'where' => array(
+				'u_id' => $user_follow['u_id'],
+				'u_follow_id' => $user_follow['u_follow_id']
+			)
+		);
+
+		if ($this->existed($existed_params, self::FOLLOW_TABLE_NAME))
+		{
+			return;
+		}
+
+		$params = array(
+			'id' => '',
+			'u_id' => $user_follow['u_id'],
+			'u_follow_id' => $user_follow['u_follow_id']
+		);
+
+		return PDO_MySQL::insert(self::FOLLOW_TABLE_NAME, $params);
 	}
 }

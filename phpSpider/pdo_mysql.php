@@ -2,8 +2,8 @@
 /**
  * @Author: huhuaquan
  * @Date:   2015-06-08 17:45:18
- * @Last Modified by:   huhuaquan
- * @Last Modified time: 2015-08-21 17:00:17
+ * @Last Modified by:   hector
+ * @Last Modified time: 2015-08-22 09:11:59
  */
 class PDO_MySQL {
 	
@@ -202,6 +202,7 @@ class PDO_MySQL {
 			self::$table,
 			$where
 		));
+		// echo "count_sql" . $count_sql . "<br>";
 		$stmt = self::$instance->prepare($count_sql);
 		self::bind($params, $stmt);
 		$result = $stmt->execute();
