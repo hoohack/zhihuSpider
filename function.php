@@ -3,7 +3,7 @@
  * @Author: hector
  * @Date:   2015-08-22 10:19:54
  * @Last Modified by:   hector
- * @Last Modified time: 2015-08-22 10:23:08
+ * @Last Modified time: 2015-08-23 00:09:46
  */
 /**
  * [getUserInfo 获取用户]
@@ -87,6 +87,10 @@ function getUserInfo($result)
  */
 function getImg($url, $u_id)
 {
+	if (empty($url))
+	{
+		return '';
+	}
     $context_options = array(  
 		'http' =>  
 		array(

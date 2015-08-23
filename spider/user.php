@@ -3,7 +3,7 @@
  * @Author: huhuaquan
  * @Date:   2015-08-21 15:25:27
  * @Last Modified by:   hector
- * @Last Modified time: 2015-08-22 09:15:39
+ * @Last Modified time: 2015-08-23 10:14:22
  */
 class User {
 	private $u_id;
@@ -139,5 +139,21 @@ class User {
 		);
 
 		return PDO_MySQL::insert(self::FOLLOW_TABLE_NAME, $params);
+	}
+
+	public function getFollowUserList($u_id, $page)
+	{
+		$params = array(
+			'where' => array(
+				'u_id' => $u_id,
+			),
+			'limit' => 20
+		);
+		if ($page != 1)
+		{
+			$params['offset'] = ($page - 1) * 20;
+		}
+
+		return PDO_MySQL::getAll(self::FOLLOW_TABLE_NAME, $params);
 	}
 }
