@@ -3,7 +3,7 @@
  * @Author: hector
  * @Date:   2015-08-22 10:19:02
  * @Last Modified by:   huhuaquan
- * @Last Modified time: 2015-08-24 10:29:28
+ * @Last Modified time: 2015-08-24 11:55:59
  */
 
 require_once './spider/curl.php';
@@ -42,23 +42,45 @@ else
 		$tmp_user = new User();
 		$params = array(
 			'u_id' => $u_id,
-			'u_follow_id' => $f_user['u_id']
+			'u_follow_id' => $f_user['u_id'],
+			'u_follow_name' => $f_user['u_name']
 		);
+		$new_result = $curl->request('GET', 'http://www.zhihu.com/people/' . $f_user['u_id'] . '/followees');
+		$new_user = getUserInfo($new_result);
+		$new_user->add();
 		$tmp_user->addFollow($params);
 	}
 }
 
 foreach ($followee_users as $tmp_user)
 {
+	if (isset($tmp_user['u_id']))
+	{
+		echo "<a href='index.php?u_id=" . $tmp_user['u_id'] . "'>" . $tmp_user['u_id'] . "</a>" . " ";
+	}
 	if (isset($tmp_user['u_follow_id']))
 	{
-		echo $tmp_user['u_follow_id'] . " ";
+		echo "<a href='index.php?u_id=" . $tmp_user['u_follow_id'] . "'>" . $tmp_user['u_follow_id'] . "</a>" . " ";
 	}
 	if (isset($tmp_user['u_name']))
 	{
 		echo $tmp_user['u_name'];
 	}
+	if (isset($tmp_user['u_follow_name']))
+	{
+		echo $tmp_user['u_follow_name'];
+	}
 	echo "<br>";
 }
 
-echo "共{$page}/" . ceil($user_info['followees_count']/20) . "页" . "<a href='?u_id={$u_id}&page=" . ($page + 1) . "' >下一页</a>";
+if ($page != 1)
+{
+	echo "<a href='?u_id={$u_id}&page=" . ($page - 1) . "'>上一页</a>";
+}
+
+echo "共{$page}/" . ceil($user_info['followees_count']/20) . "页";
+
+if ($page != ceil($user_info['followees_count']/20))
+{
+	echo "<a href='?u_id={$u_id}&page=" . ($page + 1) . "' >下一页</a>";
+}
