@@ -2,8 +2,8 @@
 /**
  * @Author: hector
  * @Date:   2015-08-22 10:19:02
- * @Last Modified by:   hector
- * @Last Modified time: 2015-08-23 10:16:47
+ * @Last Modified by:   huhuaquan
+ * @Last Modified time: 2015-08-24 10:29:28
  */
 
 require_once './spider/curl.php';
@@ -28,31 +28,35 @@ if (empty($user_info))
 	$user_info = $current_user->info($u_id);
 }
 
-if ($current_user->followees_count == $user_info['followees_count'])
+$user_followees_count = $current_user->getFollowCount();
+
+if ($current_user->followees_count == $user_followees_count)
 {
 	$followee_users = $current_user->getFollowUserList($current_user->u_id, $page);
 }
 else
 {
 	$followee_users = getUserList($page, $curl, $result, $u_id, 'followees', $user_info['followees_count']);
-}
-
-foreach ($followee_users as $f_user)
-{
-	$tmp_user = new User();
-	$params = array(
-		'u_id' => $u_id,
-		'u_follow_id' => $f_user['u_id']
-	);
-	$tmp_user->addFollow($params);
+	foreach ($followee_users as $f_user)
+	{
+		$tmp_user = new User();
+		$params = array(
+			'u_id' => $u_id,
+			'u_follow_id' => $f_user['u_id']
+		);
+		$tmp_user->addFollow($params);
+	}
 }
 
 foreach ($followee_users as $tmp_user)
 {
-	echo $tmp_user['u_follow_id'] . " ";
-	if (isset($tmp_user['nickname']))
+	if (isset($tmp_user['u_follow_id']))
 	{
-		echo $tmp_user['nickname'];
+		echo $tmp_user['u_follow_id'] . " ";
+	}
+	if (isset($tmp_user['u_name']))
+	{
+		echo $tmp_user['u_name'];
 	}
 	echo "<br>";
 }

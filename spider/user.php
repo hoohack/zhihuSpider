@@ -2,8 +2,8 @@
 /**
  * @Author: huhuaquan
  * @Date:   2015-08-21 15:25:27
- * @Last Modified by:   hector
- * @Last Modified time: 2015-08-23 10:14:22
+ * @Last Modified by:   huhuaquan
+ * @Last Modified time: 2015-08-24 10:17:59
  */
 class User {
 	private $u_id;
@@ -155,5 +155,16 @@ class User {
 		}
 
 		return PDO_MySQL::getAll(self::FOLLOW_TABLE_NAME, $params);
+	}
+
+	public function getFollowCount()
+	{
+		$params = array(
+			'where' => array(
+				'u_id' => $this->u_id
+			)
+		);
+
+		return PDO_MySQL::count(self::FOLLOW_TABLE_NAME, $params);
 	}
 }

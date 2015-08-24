@@ -2,8 +2,8 @@
 /**
  * @Author: hector
  * @Date:   2015-08-22 10:19:54
- * @Last Modified by:   hector
- * @Last Modified time: 2015-08-23 00:09:46
+ * @Last Modified by:   huhuaquan
+ * @Last Modified time: 2015-08-24 10:14:40
  */
 /**
  * [getUserInfo 获取用户]
@@ -115,8 +115,8 @@ function dealUserInfo($user_list)
 	{
 		preg_match('#<h2 class="zm-list-content-title"><a data-tip=".*?" href="http://www.zhihu.com/people/(.*?)" class="zg-link" title="(.*?)">#', $user, $out);
 		$info = array(
-			'username' => empty($out[1]) ? '' : $out[1],
-			'nickname' => empty($out[2]) ? '' : $out[2],
+			'u_id' => empty($out[1]) ? '' : $out[1],
+			'u_name' => empty($out[2]) ? '' : $out[2],
 		);
 		array_push($info_list, $info);
 	}
@@ -148,8 +148,8 @@ function getUserList($page, $curl, $result, $username, $user_type = 'followees',
 		for ($i = 0; $i < $count; $i++)
 		{
 			$user = array(
-				'username' => empty($out[1][$i]) ? '' : $out[1][$i],
-				'nickname' => empty($out[2][$i]) ? '' : $out[2][$i],
+				'u_id' => empty($out[1][$i]) ? '' : $out[1][$i],
+				'u_name' => empty($out[2][$i]) ? '' : $out[2][$i],
 			);
 			array_push($following_users, $user);
 		}

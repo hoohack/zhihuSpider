@@ -2,8 +2,8 @@
 /**
  * @Author: huhuaquan
  * @Date:   2015-06-08 17:45:18
- * @Last Modified by:   hector
- * @Last Modified time: 2015-08-23 10:15:48
+ * @Last Modified by:   huhuaquan
+ * @Last Modified time: 2015-08-24 10:18:08
  */
 class PDO_MySQL {
 	
@@ -50,7 +50,7 @@ class PDO_MySQL {
 			}
 			catch(Exception $e)
 			{
-				var_dump('catch connection exception, info : ' . $e->__toString());
+				echo 'catch connection exception, info : ' . $e->__toString();
 				return false;
 			}
 		}
