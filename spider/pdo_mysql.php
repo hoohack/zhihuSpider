@@ -3,7 +3,7 @@
  * @Author: huhuaquan
  * @Date:   2015-06-08 17:45:18
  * @Last Modified by:   huhuaquan
- * @Last Modified time: 2015-08-24 10:18:08
+ * @Last Modified time: 2015-08-24 18:33:38
  */
 class PDO_MySQL {
 	
@@ -235,7 +235,7 @@ class PDO_MySQL {
 		$columns = '(' . implode(',', $columns). ')';
 		$places = '(' . implode(',', $places) . ')';
 		$insert_sql = implode(" ", array(
-			'INSERT INTO',
+			'REPLACE INTO',
 			self::$table,
 			$columns,
 			'VALUES',
@@ -284,7 +284,7 @@ class PDO_MySQL {
 		}
 		$places = implode(',', $places);
 		$insert_sql = implode(" ", array(
-			'INSERT INTO',
+			'REPLACE INTO',
 			self::$table,
 			$columns,
 			'VALUES',
