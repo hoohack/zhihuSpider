@@ -3,7 +3,7 @@
  * @Author: huhuaquan
  * @Date:   2015-08-21 15:25:27
  * @Last Modified by:   huhuaquan
- * @Last Modified time: 2015-08-24 11:48:04
+ * @Last Modified time: 2015-08-24 16:54:04
  */
 class User {
 	private $u_id;
@@ -62,51 +62,28 @@ class User {
 		return isset($this->$property_name) ? $this->$property_name : NULL;
 	}
 
-	public function existed($params, $table)
+	public static function existed($params, $table)
 	{
 		$result = PDO_MySQL::count($table, $params);
 		return $result;
 	}
 
-	public function add()
+	public static function add($params)
 	{
 		$existed_params = array(
 			'where' => array(
-				'u_id' => $this->u_id
+				'u_id' => $params['u_id']
 			)
 		);
-		if ($this->existed($existed_params, self::TABLE_NAME))
+		if (self::existed($existed_params, self::TABLE_NAME))
 		{
 			return;
 		}
-		$params = array(
-			'id' => '',
-			'u_id' => $this->u_id,
-			'u_name' => $this->u_name,
-			'address' => $this->address,
-			'img_url' => $this->img_url,
-			'business' => $this->business,
-			'gender' => $this->gender,
-			'education' => $this->education,
-			'major' => $this->major,
-			'description' => $this->description,
-			'followees_count' => $this->followees_count,
-			'followers_count' => $this->followers_count,
-			'special_count' => $this->special_count,
-			'follow_topic_count' => $this->follow_topic_count,
-			'pv_count' => $this->pv_count,
-			'approval_count' => $this->approval_count,
-			'thank_count' => $this->thank_count,
-			'ask_count' => $this->ask_count,
-			'answer_count' => $this->answer_count,
-			'started_count' => $this->started_count,
-			'public_edit_count' => $this->public_edit_count,
-			'article_count' => $this->article_count
-		);
+		$params['id'] = '';
 		return PDO_MySQL::insert(self::TABLE_NAME, $params);
 	}
 
-	public function info($u_id)
+	public static function info($u_id)
 	{
 		$params = array(
 			'where' => array(
@@ -140,6 +117,12 @@ class User {
 		);
 
 		return PDO_MySQL::insert(self::FOLLOW_TABLE_NAME, $params);
+	}
+
+	public function addFollowList($user_follow_list)
+	{
+		$fields = array('id', 'u_id', 'u_follow_id', 'u_follow_name');
+		return PDO_MySQL::insertAll(self::FOLLOW_TABLE_NAME, $fields, $user_follow_list);
 	}
 
 	public function getFollowUserList($u_id, $page)

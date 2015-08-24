@@ -3,7 +3,7 @@
  * @Author: hector
  * @Date:   2015-08-22 10:19:02
  * @Last Modified by:   huhuaquan
- * @Last Modified time: 2015-08-24 11:55:59
+ * @Last Modified time: 2015-08-24 16:27:40
  */
 
 require_once './spider/curl.php';
@@ -36,20 +36,8 @@ if ($current_user->followees_count == $user_followees_count)
 }
 else
 {
-	$followee_users = getUserList($page, $curl, $result, $u_id, 'followees', $user_info['followees_count']);
-	foreach ($followee_users as $f_user)
-	{
-		$tmp_user = new User();
-		$params = array(
-			'u_id' => $u_id,
-			'u_follow_id' => $f_user['u_id'],
-			'u_follow_name' => $f_user['u_name']
-		);
-		$new_result = $curl->request('GET', 'http://www.zhihu.com/people/' . $f_user['u_id'] . '/followees');
-		$new_user = getUserInfo($new_result);
-		$new_user->add();
-		$tmp_user->addFollow($params);
-	}
+	$followee_users = getUserList($curl, $result, $u_id, 'followees', $user_info['followees_count']);
+	$current_user->addFollowList($followee_users);
 }
 
 foreach ($followee_users as $tmp_user)

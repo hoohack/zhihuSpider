@@ -2,8 +2,8 @@
 /**
  * @Author: huhuaquan
  * @Date:   2015-08-10 17:41:33
- * @Last Modified by:   hector
- * @Last Modified time: 2015-08-22 23:38:29
+ * @Last Modified by:   huhuaquan
+ * @Last Modified time: 2015-08-24 16:53:51
  */
 require_once './spider/curl.php';
 require_once './spider/user.php';
@@ -18,12 +18,11 @@ if (empty($u_id))
 	exit;
 }
 
-$result = $curl->request('GET', 'http://www.zhihu.com/people/' . $u_id . '/followees');
+$result = $curl->request('GET', 'http://www.zhihu.com/people/' . $u_id . '/about');
 
 $current_user = getUserInfo($result);
-$current_user->add();
-
-$user_info = $current_user->info($current_user->u_id);
+echo User::add($current_user);
+$user_info = User::info($current_user['u_id']);
 
 echo "知乎用户数据" . "<br><br><br>";
 
