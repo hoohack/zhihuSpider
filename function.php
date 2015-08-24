@@ -3,7 +3,7 @@
  * @Author: hector
  * @Date:   2015-08-22 10:19:54
  * @Last Modified by:   huhuaquan
- * @Last Modified time: 2015-08-24 16:52:52
+ * @Last Modified time: 2015-08-24 18:24:08
  */
 /**
  * [getUserInfo 获取用户]
@@ -13,16 +13,17 @@
 function getUserInfo($result)
 {
 	$user = array();
+
 	preg_match('#<a class="name" href="/people/(.*?)">(.*?)</a>#', $result, $out);
 	$user['u_id'] = empty($out[1]) ? '' : $out[1];
 	$user['u_name'] = empty($out[2]) ? '' : $out[2];
 
+	preg_match('#<span class="location item" title=["|\'](.*?)["|\']>#', $result, $out);
+	$user['address'] = empty($out[1]) ? '' : $out[1];
+
 	preg_match('#<img class="avatar avatar-l" alt=".*?" src="(.*?)" srcset=".*?" />#', $result, $out);
 	$img_url_tmp = empty($out[1]) ? '' : $out[1];
 	$user['img_url'] = getImg($img_url_tmp, $user['u_id']);
-
-	preg_match('#<span class="location item" title=["|\'](.*?)["|\']>#', $result, $out);
-	$user['address'] = empty($out[1]) ? '' : $out[1];
 
 	preg_match('#<span class="business item" title=["|\'](.*?)["|\']>#', $result, $out);
 	$user['business'] = empty($out[1]) ? '' : $out[1];
@@ -108,41 +109,39 @@ function getImg($url, $u_id)
  * @param  [type] $user_list [description]
  * @return [type]            [description]
  */
-function dealUserInfo($curl, $user_list, $u_id)
+function dealUserInfo($user_list, $u_id)
 {
 	$info_list = array();
+	$new_user_list = array();
 	foreach ($user_list as $user)
 	{
 		preg_match('#<h2 class="zm-list-content-title"><a data-tip=".*?" href="http://www.zhihu.com/people/(.*?)" class="zg-link" title="(.*?)">#', $user, $out);
-		$info = array(
-			'id' => '',
-			'u_id' => $u_id,
-			'u_follow_id' => empty($out[1][$i]) ? '' : $out[1][$i],
-			'u_follow_name' => empty($out[2][$i]) ? '' : $out[2][$i],
-		);
-		$new_result = $curl->request('GET', 'http://www.zhihu.com/people/' . $info['u_follow_id'] . '/about');
+		$info = array('', $u_id, empty($out[1]) ? '' : $out[1], empty($out[2]) ? '' : $out[2]);
+		$new_result = Curl::request('GET', 'http://www.zhihu.com/people/' . $info[2] . '/about');
 		$new_user = getUserInfo($new_result);
-		$new_user->add();
+		$new_user_list[] = array_values($new_user);
 		array_push($info_list, $info);
 	}
-
+	User::addMulti($new_user_list);
 	return $info_list;
 }
 
-function getOnePageUserList($curl, $result, $u_id, $user_type = 'followees', $count)
+function getOnePageUserList($result, $u_id, $user_type = 'followees', $count)
 {
+	$follow_user_list = array();
 	$user_list = array();
 	preg_match_all('#<h2 class="zm-list-content-title"><a data-tip=".*?" href="http://www.zhihu.com/people/(.*?)" class="zg-link" title="(.*?)">#', $result, $out);
 	for ($i = 0; $i < $count; $i++)
 	{
 		$user = array('', $u_id, empty($out[1][$i]) ? '' : $out[1][$i], empty($out[2][$i]) ? '' : $out[2][$i]);
-		$new_result = $curl->request('GET', 'http://www.zhihu.com/people/' . $user[2] . '/about');
+		$new_result = Curl::request('GET', 'http://www.zhihu.com/people/' . $user[2] . '/about');
 		$new_user = getUserInfo($new_result);
-		$new_user->add();
-		array_push($user_list, $user);
+		$user_list[] = array_values($new_user);
+		array_push($follow_user_list, $user);
 	}
 
-	return $user_list;
+	User::addMulti($user_list);
+	return $follow_user_list;
 }
 
 /**
@@ -154,12 +153,12 @@ function getOnePageUserList($curl, $result, $u_id, $user_type = 'followees', $co
  * @param  integer $count     [description]
  * @return [type]             [description]
  */
-function getUserList($curl, $result, $u_id, $user_type = 'followees', $count)
+function getUserList($result, $u_id, $user_type = 'followees', $count)
 {
 	$following_users = array();
 	if ($count <= 20)
 	{
-		$following_users = getOnePageUserList($curl, $result, $u_id, $user_type, $count);
+		$following_users = getOnePageUserList($result, $u_id, $user_type, $count);
 	}
 	else
 	{
@@ -169,7 +168,7 @@ function getUserList($curl, $result, $u_id, $user_type = 'followees', $count)
     	$url_params = empty($out[1]) ? '' : json_decode(html_entity_decode($out[1]), true);
 		$params = $url_params['params'];
 		$total_page = ceil($count/20);
-		for ($page = 1; $page < $total_page; ++$page)
+		for ($page = 1; $page <= $total_page; ++$page)
 		{
 			$params['offset'] = ($page - 1 ) * 20;
 			$post_fields = array(
@@ -177,11 +176,11 @@ function getUserList($curl, $result, $u_id, $user_type = 'followees', $count)
 				'params' =>  json_encode($params),
 				'_xsrf' => $_xsrf
 			);
-			$more_user = $curl->request('POST', 'http://www.zhihu.com/node/' . $url_params['nodename'], $post_fields);
-			$more_user_result = json_decode($more_user);
-			$more_user_tmp_list = $more_user_result->msg;
-			$more_user_list = dealUserInfo($curl, $more_user_tmp_list, $u_id);
-			array_merge($following_users, $more_user_list);
+			$more_user = Curl::request('POST', 'http://www.zhihu.com/node/' . $url_params['nodename'], $post_fields);
+			$more_user_result = json_decode($more_user, true);
+			$more_user_tmp_list = $more_user_result['msg'];
+			$more_user_list = dealUserInfo($more_user_tmp_list, $u_id);
+			$following_users = array_merge($following_users, $more_user_list);
 		}
 	}
 

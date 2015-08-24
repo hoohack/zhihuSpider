@@ -3,14 +3,13 @@
  * @Author: huhuaquan
  * @Date:   2015-08-10 17:41:33
  * @Last Modified by:   huhuaquan
- * @Last Modified time: 2015-08-24 16:53:51
+ * @Last Modified time: 2015-08-24 17:51:19
  */
 require_once './spider/curl.php';
 require_once './spider/user.php';
 require_once './spider/pdo_mysql.php';
 require_once './function.php';
 
-$curl = new Curl();
 $u_id = isset($_GET['u_id']) ? $_GET['u_id'] : '';
 if (empty($u_id))
 {
@@ -18,11 +17,22 @@ if (empty($u_id))
 	exit;
 }
 
-$result = $curl->request('GET', 'http://www.zhihu.com/people/' . $u_id . '/about');
+$params = array(
+	'where' => array(
+		'u_id' => $u_id
+	)
+);
 
-$current_user = getUserInfo($result);
-echo User::add($current_user);
-$user_info = User::info($current_user['u_id']);
+$current_user = array();
+if (!User::existed($params, 'user'))
+{
+	$result = Curl::request('GET', 'http://www.zhihu.com/people/' . $u_id . '/about');
+
+	$current_user = getUserInfo($result);
+	User::add($current_user);
+}
+
+$user_info = User::info($u_id);
 
 echo "知乎用户数据" . "<br><br><br>";
 

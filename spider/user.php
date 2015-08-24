@@ -3,7 +3,7 @@
  * @Author: huhuaquan
  * @Date:   2015-08-21 15:25:27
  * @Last Modified by:   huhuaquan
- * @Last Modified time: 2015-08-24 16:54:04
+ * @Last Modified time: 2015-08-24 18:23:18
  */
 class User {
 	private $u_id;
@@ -83,6 +83,14 @@ class User {
 		return PDO_MySQL::insert(self::TABLE_NAME, $params);
 	}
 
+	public static function addMulti($data)
+	{
+		$fields = array('u_id', 'u_name', 'address', 'img_url', 'business', 'gender', 'education', 'major', 'description',
+			'followees_count', 'followers_count', 'special_count', 'follow_topic_count', 'pv_count', 'approval_count', 'thank_count',
+			'ask_count', 'answer_count', 'started_count', 'public_edit_count', 'article_count');
+		return PDO_MySQL::insertAll(self::TABLE_NAME, $fields, $data);
+	}
+
 	public static function info($u_id)
 	{
 		$params = array(
@@ -119,13 +127,13 @@ class User {
 		return PDO_MySQL::insert(self::FOLLOW_TABLE_NAME, $params);
 	}
 
-	public function addFollowList($user_follow_list)
+	public static function addFollowList($user_follow_list)
 	{
 		$fields = array('id', 'u_id', 'u_follow_id', 'u_follow_name');
 		return PDO_MySQL::insertAll(self::FOLLOW_TABLE_NAME, $fields, $user_follow_list);
 	}
 
-	public function getFollowUserList($u_id, $page)
+	public static function getFollowUserList($u_id, $page)
 	{
 		$params = array(
 			'where' => array(
@@ -141,11 +149,11 @@ class User {
 		return PDO_MySQL::getAll(self::FOLLOW_TABLE_NAME, $params);
 	}
 
-	public function getFollowCount()
+	public static function getFollowCount($u_id)
 	{
 		$params = array(
 			'where' => array(
-				'u_id' => $this->u_id
+				'u_id' => $u_id
 			)
 		);
 
