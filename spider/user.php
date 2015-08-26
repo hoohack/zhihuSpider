@@ -3,71 +3,30 @@
  * @Author: huhuaquan
  * @Date:   2015-08-21 15:25:27
  * @Last Modified by:   huhuaquan
- * @Last Modified time: 2015-08-24 18:23:18
+ * @Last Modified time: 2015-08-25 10:22:46
  */
 class User {
-	private $u_id;
-
-	private $u_name;
-
-	private $address;
-
-	private $img_url;
-
-	private $business;
-
-	private $gender;
-
-	private $education;
-
-	private $major;
-
-	private $description;
-
-	private $followees_count;
-
-	private $followers_count;
-
-	private $special_count;
-
-	private $follow_topic_count;
-
-	private $pv_count;
-
-	private $approval_count;
-
-	private $thank_count;
-
-	private $ask_count;
-
-	private $answer_count;
-
-	private $started_count;
-
-	private $public_edit_count;
-
-	private $article_count;
 
 	const TABLE_NAME = 'user';
 
 	const FOLLOW_TABLE_NAME = 'user_follow';
 
-	public function __set($property_name, $value)
-	{
-		$this->$property_name = $value;
-	}
-
-	public function __get($property_name)
-	{
-		return isset($this->$property_name) ? $this->$property_name : NULL;
-	}
-
+	/**
+	 * [existed 判断用户是否已存在]
+	 * @param  [type] $params [description]
+	 * @param  [type] $table  [description]
+	 * @return [type]         [description]
+	 */
 	public static function existed($params, $table)
 	{
 		$result = PDO_MySQL::count($table, $params);
 		return $result;
 	}
 
+	/**
+	 * [add 新增一个用户]
+	 * @param [type] $params [description]
+	 */
 	public static function add($params)
 	{
 		$existed_params = array(
@@ -83,6 +42,10 @@ class User {
 		return PDO_MySQL::insert(self::TABLE_NAME, $params);
 	}
 
+	/**
+	 * [addMulti 增加多个用户]
+	 * @param [type] $data [description]
+	 */
 	public static function addMulti($data)
 	{
 		$fields = array('u_id', 'u_name', 'address', 'img_url', 'business', 'gender', 'education', 'major', 'description',
@@ -91,6 +54,11 @@ class User {
 		return PDO_MySQL::insertAll(self::TABLE_NAME, $fields, $data);
 	}
 
+	/**
+	 * [info 返回用户信息]
+	 * @param  [type] $u_id [description]
+	 * @return [type]       [description]
+	 */
 	public static function info($u_id)
 	{
 		$params = array(
@@ -103,36 +71,22 @@ class User {
 		return $result;
 	}
 
-	public function addFollow($user_follow)
-	{
-		$existed_params = array(
-			'where' => array(
-				'u_id' => $user_follow['u_id'],
-				'u_follow_id' => $user_follow['u_follow_id']
-			)
-		);
-
-		if ($this->existed($existed_params, self::FOLLOW_TABLE_NAME))
-		{
-			return;
-		}
-
-		$params = array(
-			'id' => '',
-			'u_id' => $user_follow['u_id'],
-			'u_follow_id' => $user_follow['u_follow_id'],
-			'u_follow_name' => $user_follow['u_follow_name']
-		);
-
-		return PDO_MySQL::insert(self::FOLLOW_TABLE_NAME, $params);
-	}
-
+	/**
+	 * [addFollowList 增加用户关系]
+	 * @param [type] $user_follow_list [description]
+	 */
 	public static function addFollowList($user_follow_list)
 	{
 		$fields = array('id', 'u_id', 'u_follow_id', 'u_follow_name');
 		return PDO_MySQL::insertAll(self::FOLLOW_TABLE_NAME, $fields, $user_follow_list);
 	}
 
+	/**
+	 * [getFollowUserList 返回用户关系列表]
+	 * @param  [type] $u_id [description]
+	 * @param  [type] $page [description]
+	 * @return [type]       [description]
+	 */
 	public static function getFollowUserList($u_id, $page)
 	{
 		$params = array(
@@ -149,6 +103,11 @@ class User {
 		return PDO_MySQL::getAll(self::FOLLOW_TABLE_NAME, $params);
 	}
 
+	/**
+	 * [getFollowCount 返回用户关注人数量]
+	 * @param  [type] $u_id [description]
+	 * @return [type]       [description]
+	 */
 	public static function getFollowCount($u_id)
 	{
 		$params = array(

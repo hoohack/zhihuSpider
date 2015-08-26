@@ -3,7 +3,7 @@
  * @Author: hector
  * @Date:   2015-08-22 10:19:54
  * @Last Modified by:   huhuaquan
- * @Last Modified time: 2015-08-24 18:24:08
+ * @Last Modified time: 2015-08-25 16:01:26
  */
 /**
  * [getUserInfo 获取用户]
@@ -112,17 +112,17 @@ function getImg($url, $u_id)
 function dealUserInfo($user_list, $u_id)
 {
 	$info_list = array();
-	$new_user_list = array();
+	$new_user_id_list = array();
 	foreach ($user_list as $user)
 	{
 		preg_match('#<h2 class="zm-list-content-title"><a data-tip=".*?" href="http://www.zhihu.com/people/(.*?)" class="zg-link" title="(.*?)">#', $user, $out);
+		$new_user_id_list[] = $out[1];
 		$info = array('', $u_id, empty($out[1]) ? '' : $out[1], empty($out[2]) ? '' : $out[2]);
-		$new_result = Curl::request('GET', 'http://www.zhihu.com/people/' . $info[2] . '/about');
-		$new_user = getUserInfo($new_result);
-		$new_user_list[] = array_values($new_user);
 		array_push($info_list, $info);
 	}
+	$new_user_list = Curl::getMultiUser($new_user_id_list);
 	User::addMulti($new_user_list);
+	usleep(10000);
 	return $info_list;
 }
 
@@ -131,15 +131,12 @@ function getOnePageUserList($result, $u_id, $user_type = 'followees', $count)
 	$follow_user_list = array();
 	$user_list = array();
 	preg_match_all('#<h2 class="zm-list-content-title"><a data-tip=".*?" href="http://www.zhihu.com/people/(.*?)" class="zg-link" title="(.*?)">#', $result, $out);
+	$user_list = Curl::getMultiUser($out[1]);
 	for ($i = 0; $i < $count; $i++)
 	{
 		$user = array('', $u_id, empty($out[1][$i]) ? '' : $out[1][$i], empty($out[2][$i]) ? '' : $out[2][$i]);
-		$new_result = Curl::request('GET', 'http://www.zhihu.com/people/' . $user[2] . '/about');
-		$new_user = getUserInfo($new_result);
-		$user_list[] = array_values($new_user);
 		array_push($follow_user_list, $user);
 	}
-
 	User::addMulti($user_list);
 	return $follow_user_list;
 }

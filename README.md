@@ -1,2 +1,4 @@
 # zhihuSpider
-A zhihu Spider.Just for fun.
+Just for fun.
+
+一个抓取知乎用户数据的应用。
