@@ -92,15 +92,15 @@ function getImg($url, $u_id)
 	{
 		return '';
 	}
-    $context_options = array(  
-		'http' =>  
-		array(
-			'header' => "Referer:http://www.zhihu.com",  
-	));
+ //    $context_options = array(  
+	// 	'http' =>  
+	// 	array(
+	// 		'header' => "Referer:http://www.zhihu.com",  
+	// ));
 	  
-	$context = stream_context_create($context_options);  
-	$img = file_get_contents($url, FALSE, $context);
-	file_put_contents('./images/' . $u_id . ".jpg", $img);
+	// $context = stream_context_create($context_options);  
+	// $img = file_get_contents($url, FALSE, $context);
+	// file_put_contents('./images/' . $u_id . ".jpg", $img);
 	return "images/$u_id" . '.jpg';
 }
 
@@ -121,9 +121,9 @@ function dealUserInfo($user_list, $u_id)
 		array_push($info_list, $info);
 	}
 	$new_user_list = Curl::getMultiUser($new_user_id_list);
-	User::addMulti($new_user_list);
-	usleep(10000);
-	return $info_list;
+	$result = array($new_user_list, $info_list);
+	usleep(100);
+	return $result;
 }
 
 function getOnePageUserList($result, $u_id, $user_type = 'followees', $count)
@@ -153,6 +153,7 @@ function getOnePageUserList($result, $u_id, $user_type = 'followees', $count)
 function getUserList($result, $u_id, $user_type = 'followees', $count)
 {
 	$following_users = array();
+	$more_user_list = array();
 	if ($count <= 20)
 	{
 		$following_users = getOnePageUserList($result, $u_id, $user_type, $count);
@@ -176,9 +177,11 @@ function getUserList($result, $u_id, $user_type = 'followees', $count)
 			$more_user = Curl::request('POST', 'http://www.zhihu.com/node/' . $url_params['nodename'], $post_fields);
 			$more_user_result = json_decode($more_user, true);
 			$more_user_tmp_list = $more_user_result['msg'];
-			$more_user_list = dealUserInfo($more_user_tmp_list, $u_id);
-			$following_users = array_merge($following_users, $more_user_list);
+			$result = dealUserInfo($more_user_tmp_list, $u_id);
+			$more_user_list = array_merge($more_user_list, $result[0]);
+			$following_users = array_merge($following_users, $result[1]);
 		}
+		User::addMulti($more_user_list);
 	}
 
 	return $following_users;

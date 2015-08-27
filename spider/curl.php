@@ -15,7 +15,7 @@ class Curl {
 		$ch = curl_init($url);
 		curl_setopt($ch, CURLOPT_HEADER, 0);
 		curl_setopt($ch, CURLOPT_COOKIE, self::$user_cookie);
-		curl_setopt($ch, CURLOPT_USERAGENT, $_SERVER['HTTP_USER_AGENT']);
+		curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/44.0.2403.130 Safari/537.36');
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
 		curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
 		curl_setopt($ch, CURLOPT_TIMEOUT, 10);
@@ -37,7 +37,8 @@ class Curl {
 	{
 		$ch_arr = array();
 		$text = array();
-		$max_size = 5;
+		$len = count($user_list);
+		$max_size = ($len > 5) ? 5 : $len;
 		$requestMap = array();
 
 		$mh = curl_multi_init();
@@ -47,7 +48,7 @@ class Curl {
 			curl_setopt($ch, CURLOPT_HEADER, 0);
 			curl_setopt($ch, CURLOPT_URL, 'http://www.zhihu.com/people/' . $user_list[$i] . '/about');
 			curl_setopt($ch, CURLOPT_COOKIE, self::$user_cookie);
-			curl_setopt($ch, CURLOPT_USERAGENT, $_SERVER['HTTP_USER_AGENT']);
+			curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/44.0.2403.130 Safari/537.36');
 			curl_setopt($ch, CURLOPT_RETURNTRANSFER, true); 
 			curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
 			$requestMap[$i] = $ch;
@@ -75,7 +76,7 @@ class Curl {
 					curl_setopt($ch, CURLOPT_HEADER, 0);
 					curl_setopt($ch, CURLOPT_URL, 'http://www.zhihu.com/people/' . $user_list[$i] . '/about');
 					curl_setopt($ch, CURLOPT_COOKIE, self::$user_cookie);
-					curl_setopt($ch, CURLOPT_USERAGENT, $_SERVER['HTTP_USER_AGENT']);
+					curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/44.0.2403.130 Safari/537.36');
 					curl_setopt($ch, CURLOPT_RETURNTRANSFER, true); 
 					curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
 					$requestMap[$i] = $ch;
