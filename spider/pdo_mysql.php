@@ -3,12 +3,11 @@
  * @Author: huhuaquan
  * @Date:   2015-06-08 17:45:18
  * @Last Modified by:   huhuaquan
- * @Last Modified time: 2015-08-24 18:33:38
+ * @Last Modified time: 2015-09-09 14:35:23
  */
 class PDO_MySQL {
-	
-	//PDO实例
-	private static $instance = null;
+	private $pdo;
+
 	//表名
 	private static $table = null;
 	//操作符
@@ -33,45 +32,36 @@ class PDO_MySQL {
 	);
 	//配置文件路径
 	private static $config_file_path = 'db_config.php';
-	//程序对外统一入口
-	public static function __callStatic($func_name, $args)
+
+	public function __construct()
 	{
 		$config = require self::$config_file_path;
-		//初始化连接
-		if (self::$instance === null)
-		{
-			$dsn = $config['mysql']['dsn'];
-			$username = $config['mysql']['username'];
-			$password = $config['mysql']['password'];
-			$option = $config['mysql']['option'];
-			try
-			{
-				self::$instance = new PDO($dsn, $username, $password, $option);
-			}
-			catch(Exception $e)
-			{
-				echo 'catch connection exception, info : ' . $e->__toString();
-				return false;
-			}
+		$dsn = $config['mysql']['dsn'];
+		$username = $config['mysql']['username'];
+		$password = $config['mysql']['password'];
+		$option = $config['mysql']['option'];
+		try {
+			$this->pdo = new PDO($dsn, $username, $password, $option);
+			return $this->pdo;
+		} catch(Exception $e) {
+			echo 'catch connection exception, info : ' . $e->__toString();
+			return false;
 		}
-		self::$table = $config['mysql']['tbl_prefix'] . $args[0];
-		if (method_exists("PDO_MySQL", $func_name))
-		{
-			try
-			{
-				//调用对应函数
-				$ret = call_user_func_array("self::$func_name", $args);
-			}
-			catch(Exception $e)
-			{
-				var_dump("query mysql exception, info : " . $e->__toString());
-				return false;
-			}
-			return $ret;
-		}
-		var_dump("method not allow, args:" . json_encode(func_get_args()));
-		return false;
 	}
+
+	//程序对外统一入口
+	public static function getInstance()
+	{
+		$key = getmypid();
+		$instances = array();
+		//初始化连接
+		if (empty($instances[$key]))
+		{
+			$instances[$key] = new self();
+		}
+		return $instances[$key];
+	}
+
 	/**
 	* 返回一行数据
 	* @param 	$table 			string 		表名
@@ -79,7 +69,7 @@ class PDO_MySQL {
 	* @param 	$fields 		string 		检索字段
 	* @return  					array 		检索结果组成的一维数组
 	*/
-	private static function getOneRow($table, $conditions = array(), $field = '*')
+	public function getOneRow($table, $conditions = array(), $field = '*')
 	{
 		$params = array();
 		$where = empty($conditions) ? '' : self::biuldMultiWhere($conditions, $params);
@@ -87,11 +77,11 @@ class PDO_MySQL {
 			'SELECT',
 			$field,
 			' FROM ',
-			self::$table,
+			'zh_' . $table,
 			$where,
 			'LIMIT 1',
 		));
-		$stmt = self::$instance->prepare($select_sql);
+		$stmt = $this->pdo->prepare($select_sql);
 		self::bind($params, $stmt);
 		$result = $stmt->execute();
 		if ($result === false)
@@ -107,7 +97,7 @@ class PDO_MySQL {
 	* @param 	$conditions array 		检索条件
 	* @return   			array 		返回数据组成的数组
 	*/
-	private static function getAll($table, $conditions)
+	public function getAll($table, $conditions)
 	{
 		$fields = empty($conditions['fields']) ? '*' : $conditions['fields'];
 		$join = '';
@@ -167,7 +157,7 @@ class PDO_MySQL {
 			'SELECT',
 			$fields,
 			'FROM',
-			self::$table,
+			'zh_' . $table,
 			$join,
 			$where,
 			$or_where,
@@ -177,7 +167,7 @@ class PDO_MySQL {
 			$limit,
 			$offset,
 		));
-		$stmt = self::$instance->prepare($select_sql);
+		$stmt = $this->pdo->prepare($select_sql);
 		self::bind($params, $stmt);
 		$result = $stmt->execute();
 		if ($result === false)
@@ -193,17 +183,18 @@ class PDO_MySQL {
 	* @param 	$conditions 	array 	检索条件
 	* @return 					int 	数量的结果
 	*/
-	private static function count($table, $conditions = array())
+	public function count($table, $conditions = array())
 	{
+		$key = getmypid();
 		$params = array();
 		$where = empty($conditions) ? '' : self::biuldMultiWhere($conditions, $params);
 		$count_sql = implode(" ", array(
 			'SELECT COUNT(*) AS total_num FROM',
-			self::$table,
+			'zh_' . $table,
 			$where
 		));
-		// echo "count_sql" . $count_sql . "<br>";
-		$stmt = self::$instance->prepare($count_sql);
+		// echo "count_sql" . $count_sql . "\n";
+		$stmt = $this->pdo->prepare($count_sql);
 		self::bind($params, $stmt);
 		$result = $stmt->execute();
 		if($result === false)
@@ -221,8 +212,9 @@ class PDO_MySQL {
 	* @param 	$data 	array 	需要插入的数据
 	* @return 			int 	插入新行的ID
 	*/
-	private static function insert($table, $data)
+	public function insert($table, $data)
 	{
+		$key = getmypid();
 		$columns = array();
 		$places = array();
 		$params = array();
@@ -236,12 +228,12 @@ class PDO_MySQL {
 		$places = '(' . implode(',', $places) . ')';
 		$insert_sql = implode(" ", array(
 			'REPLACE INTO',
-			self::$table,
+			'zh_' . $table,
 			$columns,
 			'VALUES',
 			$places
 		));
-		$stmt = self::$instance->prepare($insert_sql);
+		$stmt = $this->pdo->prepare($insert_sql);
 		self::bind($params, $stmt);
 		$result = $stmt->execute();
 		if ($result !== true)
@@ -249,7 +241,7 @@ class PDO_MySQL {
 			var_dump("Insert error, args" . json_encode(func_get_args()));
 			return false;
 		}
-		return self::$instance->lastInsertId();
+		return self::$instances[$key]->lastInsertId();
 	}
 	/**
 	* 插入多行数据到数据库中
@@ -258,7 +250,7 @@ class PDO_MySQL {
 	* @param 	$datas 		array 	插入的数据
 	* @return 				int 	插入的最后一行的ID
 	*/
-	private static function insertAll($table, $fields, $datas)
+	public function insertAll($table, $fields, $datas)
 	{
 		$columns = array();
 		foreach ($fields as $field)
@@ -285,12 +277,12 @@ class PDO_MySQL {
 		$places = implode(',', $places);
 		$insert_sql = implode(" ", array(
 			'REPLACE INTO',
-			self::$table,
+			'zh_' . $table,
 			$columns,
 			'VALUES',
 			$places
 		));
-		$stmt = self::$instance->prepare($insert_sql);
+		$stmt = $this->pdo->prepare($insert_sql);
 		self::bindMulti($params, $stmt);
 		$result = $stmt->execute();
 		if ($result !== true)
@@ -306,16 +298,17 @@ class PDO_MySQL {
 	* @param 	$conditions 	array 	执行条件
 	* @return 					int 	影响行数
 	*/
-	private static function delete($table, $conditions)
+	public function delete($table, $conditions)
 	{
+		$key = getmypid();
 		$params = array();
 		$where = empty($conditions) ? '' : self::biuldMultiWhere($conditions, $params);
 		$delete_sql = implode(' ', array(
 			'DELETE FROM ',
-			self::$table,
+			'zh_' . $table,
 			$where,
 		));
-		$stmt = self::$instance->prepare($delete_sql);
+		$stmt = $this->pdo->prepare($delete_sql);
 		self::bind($params, $stmt);
 		$result = $stmt->execute();
 		if ($result === false)
@@ -332,8 +325,9 @@ class PDO_MySQL {
 	* @param 	$data 			array 	更新的数据
 	* @return 					int 	影响行数
 	*/
-	private static function update($table, $conditions, $data)
+	public function update($table, $conditions, $data)
 	{
+		$key = getmypid();
 		$columns = array();
 		$params = array();
 		foreach ($data as $tmp_field => $value)
@@ -345,12 +339,12 @@ class PDO_MySQL {
 		$where = self::biuldMultiWhere($conditions, $params);
 		$update_sql = implode(' ', array(
 			'UPDATE',
-			self::$table,
+			'zh_' . $table,
 			'SET',
 			$columns,
 			$where
 		));
-		$stmt = self::$instance->prepare($update_sql);
+		$stmt = $this->pdo->prepare($update_sql);
 		self::bind($params, $stmt);
 		$result = $stmt->execute();
 		if ($result === false)
@@ -365,7 +359,7 @@ class PDO_MySQL {
 	* @param 	$params 	array 	一个占位符与值的键值对数组
 	* @param 	$stmt 		object 	PDOStatement对象
 	*/
-	private static function bind($params, &$stmt)
+	public function bind($params, &$stmt)
 	{
 		foreach ($params as $field => $value)
 		{
@@ -377,7 +371,7 @@ class PDO_MySQL {
 	* @param 	$params 	array 	多个占位符与值的键值对数组
 	* @param 	$stmt 		object 	PDOStatement对象
 	*/
-	private static function bindMulti($params_array, &$stmt)
+	public function bindMulti($params_array, &$stmt)
 	{
 		foreach ($params_array as $params)
 		{
@@ -389,9 +383,9 @@ class PDO_MySQL {
 	* @param 	$stmt 			object 	PDOStatement对象
 	* @return 	$lastInsertedId	int 	多行插入的最后插入行的ID
 	*/
-	private static function multiLastInsertId($stmt)
+	public function multiLastInsertId($stmt)
 	{
-		$firstInsertedId = self::$instance->lastInsertId();
+		$firstInsertedId = $this->pdo->lastInsertId();
 		$lastInsertedId = $firstInsertedId + ($stmt->rowCount() - 1);
 		return $lastInsertedId;
 	}
