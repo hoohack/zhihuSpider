@@ -3,7 +3,7 @@
  * @Author: huhuaquan
  * @Date:   2015-08-26 11:38:18
  * @Last Modified by:   huhuaquan
- * @Last Modified time: 2015-09-09 14:33:49
+ * @Last Modified time: 2015-09-09 18:17:54
  */
 require_once './spider/user.php';
 require_once './function.php';
@@ -16,7 +16,9 @@ $user_cookie = '_za=a41e1b8b-517a-4fea-9465-88e8c80ba17e;q_cl=3198dbc291fa40d7b7
 $redis = PRedis::getInstance();
 $redis->flushdb();
 $redis->lpush('request_queue', 'mora-hu');
-$max_connect = 200;
+
+//进程数
+$max_connect = 8;
 while (1)
 {
 	echo "begin get user info...\n";
@@ -48,6 +50,20 @@ while (1)
 			$tmp_u_id = $tmp_redis->lpop('request_queue');
 			echo "getting {$tmp_u_id} follower list\n";
 			$result = Curl::request('GET', 'http://www.zhihu.com/people/' . $tmp_u_id . '/followees');
+			
+			//如果获取失败，继续循环请求5次，如果还是失败则放弃
+			if (empty($result))
+			{
+				$i = 0;
+				while(empty($result))
+				{
+					$result = Curl::request('GET', 'http://www.zhihu.com/people/' . $tmp_u_id . '/followees');
+					if (++$i == 5)
+					{
+						exit($i);
+					}
+				}
+			}
 			$params = array(
 				'where' => array(
 					'u_id' => $tmp_u_id
@@ -86,5 +102,4 @@ while (1)
 		}
 		echo "$status finished\n";
 	}
-	exit;
 }

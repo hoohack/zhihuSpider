@@ -3,7 +3,7 @@
  * @Author: hector
  * @Date:   2015-08-22 10:19:54
  * @Last Modified by:   huhuaquan
- * @Last Modified time: 2015-09-09 14:36:34
+ * @Last Modified time: 2015-09-09 18:19:59
  */
 /**
  * [getUserInfo 获取用户]
@@ -88,7 +88,6 @@ function getUserInfo($result)
  */
 function getImg($url, $u_id)
 {
-	//如果文件已经存在，则不必再获取
 	if (file_exists('./images/' . $u_id . ".jpg"))
 	{
 		return "images/$u_id" . '.jpg';
@@ -104,7 +103,7 @@ function getImg($url, $u_id)
 	));
 	  
 	$context = stream_context_create($context_options);  
-	$img = file_get_contents($url, FALSE, $context);
+	$img = file_get_contents('http:' . $url, FALSE, $context);
 	file_put_contents('./images/' . $u_id . ".jpg", $img);
 	return "images/$u_id" . '.jpg';
 }
@@ -118,6 +117,10 @@ function dealUserInfo($user_list, $u_id)
 {
 	$info_list = array();
 	$new_user_id_list = array();
+	if (empty($user_list))
+	{
+		return array();
+	}
 	foreach ($user_list as $user)
 	{
 		preg_match('#<h2 class="zm-list-content-title"><a data-tip=".*?" href="http://www.zhihu.com/people/(.*?)" class="zg-link" title="(.*?)">#', $user, $out);
@@ -127,7 +130,7 @@ function dealUserInfo($user_list, $u_id)
 	}
 	$new_user_list = Curl::getMultiUser($new_user_id_list);
 	$result = array($new_user_list, $info_list);
-	usleep(100);
+	usleep(1);
 	return $result;
 }
 
@@ -169,7 +172,7 @@ function getUserList($result, $u_id, $user_type = 'followees', $count)
     	$_xsrf = empty($out[1]) ? '' : trim($out[1]);
     	preg_match('#<div class="zh-general-list clearfix" data-init="(.*?)">#', $result, $out);
     	$url_params = empty($out[1]) ? '' : json_decode(html_entity_decode($out[1]), true);
-		if (!empty($_xsrf) && !empty($url_params) && is_array($url_params))
+    	if (!empty($_xsrf) && !empty($url_params) && is_array($url_params))
     	{
 			$params = $url_params['params'];
 			$total_page = ceil($count/20);
@@ -185,6 +188,10 @@ function getUserList($result, $u_id, $user_type = 'followees', $count)
 				$more_user_result = json_decode($more_user, true);
 				$more_user_tmp_list = $more_user_result['msg'];
 				$result = dealUserInfo($more_user_tmp_list, $u_id);
+				if (empty($result))
+				{
+					continue;
+				}
 				$more_user_list = array_merge($more_user_list, $result[0]);
 				$following_users = array_merge($following_users, $result[1]);
 			}

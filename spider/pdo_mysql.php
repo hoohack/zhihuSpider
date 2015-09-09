@@ -3,7 +3,7 @@
  * @Author: huhuaquan
  * @Date:   2015-06-08 17:45:18
  * @Last Modified by:   huhuaquan
- * @Last Modified time: 2015-09-09 14:35:23
+ * @Last Modified time: 2015-09-09 18:19:24
  */
 class PDO_MySQL {
 	private $pdo;
@@ -82,7 +82,7 @@ class PDO_MySQL {
 			'LIMIT 1',
 		));
 		$stmt = $this->pdo->prepare($select_sql);
-		self::bind($params, $stmt);
+		$this->bind($params, $stmt);
 		$result = $stmt->execute();
 		if ($result === false)
 		{
@@ -168,7 +168,7 @@ class PDO_MySQL {
 			$offset,
 		));
 		$stmt = $this->pdo->prepare($select_sql);
-		self::bind($params, $stmt);
+		$this->bind($params, $stmt);
 		$result = $stmt->execute();
 		if ($result === false)
 		{
@@ -195,7 +195,7 @@ class PDO_MySQL {
 		));
 		// echo "count_sql" . $count_sql . "\n";
 		$stmt = $this->pdo->prepare($count_sql);
-		self::bind($params, $stmt);
+		$this->bind($params, $stmt);
 		$result = $stmt->execute();
 		if($result === false)
 		{
@@ -234,14 +234,14 @@ class PDO_MySQL {
 			$places
 		));
 		$stmt = $this->pdo->prepare($insert_sql);
-		self::bind($params, $stmt);
+		$this->bind($params, $stmt);
 		$result = $stmt->execute();
 		if ($result !== true)
 		{
 			var_dump("Insert error, args" . json_encode(func_get_args()));
 			return false;
 		}
-		return self::$instances[$key]->lastInsertId();
+		return $this->pdo->lastInsertId();
 	}
 	/**
 	* 插入多行数据到数据库中
@@ -283,14 +283,14 @@ class PDO_MySQL {
 			$places
 		));
 		$stmt = $this->pdo->prepare($insert_sql);
-		self::bindMulti($params, $stmt);
+		$this->bindMulti($params, $stmt);
 		$result = $stmt->execute();
 		if ($result !== true)
 		{
 			var_dump("Insert error, args" . json_encode(func_get_args()));
 			return false;
 		}
-		return self::multiLastInsertId($stmt);
+		return $this->multiLastInsertId($stmt);
 	}
 	/**
 	* 删除操作
@@ -309,7 +309,7 @@ class PDO_MySQL {
 			$where,
 		));
 		$stmt = $this->pdo->prepare($delete_sql);
-		self::bind($params, $stmt);
+		$this->bind($params, $stmt);
 		$result = $stmt->execute();
 		if ($result === false)
 		{
@@ -345,7 +345,7 @@ class PDO_MySQL {
 			$where
 		));
 		$stmt = $this->pdo->prepare($update_sql);
-		self::bind($params, $stmt);
+		$this->bind($params, $stmt);
 		$result = $stmt->execute();
 		if ($result === false)
 		{
@@ -359,7 +359,7 @@ class PDO_MySQL {
 	* @param 	$params 	array 	一个占位符与值的键值对数组
 	* @param 	$stmt 		object 	PDOStatement对象
 	*/
-	public function bind($params, &$stmt)
+	private function bind($params, &$stmt)
 	{
 		foreach ($params as $field => $value)
 		{
@@ -371,11 +371,11 @@ class PDO_MySQL {
 	* @param 	$params 	array 	多个占位符与值的键值对数组
 	* @param 	$stmt 		object 	PDOStatement对象
 	*/
-	public function bindMulti($params_array, &$stmt)
+	private function bindMulti($params_array, &$stmt)
 	{
 		foreach ($params_array as $params)
 		{
-			self::bind($params, $stmt);
+			$this->bind($params, $stmt);
 		}
 	}
 	/**
@@ -383,7 +383,7 @@ class PDO_MySQL {
 	* @param 	$stmt 			object 	PDOStatement对象
 	* @return 	$lastInsertedId	int 	多行插入的最后插入行的ID
 	*/
-	public function multiLastInsertId($stmt)
+	private function multiLastInsertId($stmt)
 	{
 		$firstInsertedId = $this->pdo->lastInsertId();
 		$lastInsertedId = $firstInsertedId + ($stmt->rowCount() - 1);
@@ -395,7 +395,7 @@ class PDO_MySQL {
 	* @param 	$param 			array 	构造后的占位符与值的键值对数组
 	* @return 	$ret 			array 	构造后的where条件组成的数组
 	*/
-	private static function buildWhere($conditions, &$params)
+	private function buildWhere($conditions, &$params)
 	{
 		$ret = array();
 		foreach ($conditions as $field => $express)
@@ -443,7 +443,7 @@ class PDO_MySQL {
 	* @param 	$param 			array 	构造后的占位符与值的键值对数组
 	* @return 	$ret 			string 	构造后的where条件
 	*/
-	private static function biuldMultiWhere($conditions, &$params)
+	private function biuldMultiWhere($conditions, &$params)
 	{
 		$where = "";
 		$or_where = "";
@@ -451,19 +451,19 @@ class PDO_MySQL {
 		{
 			if (!empty($conditions['where']))
 			{
-				$tmp_where = self::buildWhere($conditions['where'], $params);
+				$tmp_where = $this->buildWhere($conditions['where'], $params);
 				$where = " where " . implode(' and ', $tmp_where);
 			}
 			if (!empty($conditions['or_where']))
 			{
-				$tmp_or_where = self::buildWhere($conditions['or_where'], $params);
+				$tmp_or_where = $this->buildWhere($conditions['or_where'], $params);
 				$prefix = empty($where) ? " where " : " ";
 				$or_where = $prefix . implode(' and ', $tmp_where);
 			}
 		}
 		else
 		{
-			$tmp_where = self::buildWhere($conditions, $params);
+			$tmp_where = $this->buildWhere($conditions, $params);
 			$where = ' where ' . implode(' and ', $tmp_where);
 		}
 		return $where . $or_where;
