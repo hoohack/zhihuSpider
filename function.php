@@ -3,7 +3,7 @@
  * @Author: hector
  * @Date:   2015-08-22 10:19:54
  * @Last Modified by:   huhuaquan
- * @Last Modified time: 2015-09-09 14:32:57
+ * @Last Modified time: 2015-09-09 14:36:34
  */
 /**
  * [getUserInfo 获取用户]
@@ -169,24 +169,31 @@ function getUserList($result, $u_id, $user_type = 'followees', $count)
     	$_xsrf = empty($out[1]) ? '' : trim($out[1]);
     	preg_match('#<div class="zh-general-list clearfix" data-init="(.*?)">#', $result, $out);
     	$url_params = empty($out[1]) ? '' : json_decode(html_entity_decode($out[1]), true);
-		$params = $url_params['params'];
-		$total_page = ceil($count/20);
-		for ($page = 1; $page <= $total_page; ++$page)
-		{
-			$params['offset'] = ($page - 1 ) * 20;
-			$post_fields = array(
-				'method' => 'next',
-				'params' =>  json_encode($params),
-				'_xsrf' => $_xsrf
-			);
-			$more_user = Curl::request('POST', 'http://www.zhihu.com/node/' . $url_params['nodename'], $post_fields);
-			$more_user_result = json_decode($more_user, true);
-			$more_user_tmp_list = $more_user_result['msg'];
-			$result = dealUserInfo($more_user_tmp_list, $u_id);
-			$more_user_list = array_merge($more_user_list, $result[0]);
-			$following_users = array_merge($following_users, $result[1]);
+		if (!empty($_xsrf) && !empty($url_params) && is_array($url_params))
+    	{
+			$params = $url_params['params'];
+			$total_page = ceil($count/20);
+			for ($page = 1; $page <= $total_page; ++$page)
+			{
+				$params['offset'] = ($page - 1 ) * 20;
+				$post_fields = array(
+					'method' => 'next',
+					'params' =>  json_encode($params),
+					'_xsrf' => $_xsrf
+				);
+				$more_user = Curl::request('POST', 'http://www.zhihu.com/node/' . $url_params['nodename'], $post_fields);
+				$more_user_result = json_decode($more_user, true);
+				$more_user_tmp_list = $more_user_result['msg'];
+				$result = dealUserInfo($more_user_tmp_list, $u_id);
+				$more_user_list = array_merge($more_user_list, $result[0]);
+				$following_users = array_merge($following_users, $result[1]);
+			}
+			User::addMulti($more_user_list);
 		}
-		User::addMulti($more_user_list);
+		else
+		{
+			return array();
+		}
 	}
 
 	return $following_users;
