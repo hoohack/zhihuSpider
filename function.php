@@ -3,7 +3,7 @@
  * @Author: hector
  * @Date:   2015-08-22 10:19:54
  * @Last Modified by:   huhuaquan
- * @Last Modified time: 2015-09-09 14:30:38
+ * @Last Modified time: 2015-09-09 14:32:57
  */
 /**
  * [getUserInfo 获取用户]
@@ -88,6 +88,11 @@ function getUserInfo($result)
  */
 function getImg($url, $u_id)
 {
+	//如果文件已经存在，则不必再获取
+	if (file_exists('./images/' . $u_id . ".jpg"))
+	{
+		return "images/$u_id" . '.jpg';
+	}
 	if (empty($url))
 	{
 		return '';
