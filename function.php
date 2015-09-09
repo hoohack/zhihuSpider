@@ -3,7 +3,7 @@
  * @Author: hector
  * @Date:   2015-08-22 10:19:54
  * @Last Modified by:   huhuaquan
- * @Last Modified time: 2015-08-25 16:01:26
+ * @Last Modified time: 2015-09-09 14:30:38
  */
 /**
  * [getUserInfo 获取用户]
@@ -92,15 +92,15 @@ function getImg($url, $u_id)
 	{
 		return '';
 	}
- //    $context_options = array(  
-	// 	'http' =>  
-	// 	array(
-	// 		'header' => "Referer:http://www.zhihu.com",  
-	// ));
+    $context_options = array(  
+		'http' =>  
+		array(
+			'header' => "Referer:http://www.zhihu.com",  
+	));
 	  
-	// $context = stream_context_create($context_options);  
-	// $img = file_get_contents($url, FALSE, $context);
-	// file_put_contents('./images/' . $u_id . ".jpg", $img);
+	$context = stream_context_create($context_options);  
+	$img = file_get_contents($url, FALSE, $context);
+	file_put_contents('./images/' . $u_id . ".jpg", $img);
 	return "images/$u_id" . '.jpg';
 }
 

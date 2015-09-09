@@ -3,7 +3,7 @@
  * @Author: huhuaquan
  * @Date:   2015-08-21 15:25:27
  * @Last Modified by:   huhuaquan
- * @Last Modified time: 2015-08-25 10:22:46
+ * @Last Modified time: 2015-09-09 14:31:15
  */
 class User {
 
@@ -19,7 +19,9 @@ class User {
 	 */
 	public static function existed($params, $table)
 	{
-		$result = PDO_MySQL::count($table, $params);
+		$tmp_pdo = PDO_MySQL::getInstance();
+		$result = $tmp_pdo->count($table, $params);
+		$tmp_pdo = null;
 		return $result;
 	}
 
@@ -29,6 +31,7 @@ class User {
 	 */
 	public static function add($params)
 	{
+		$tmp_pdo = PDO_MySQL::getInstance();
 		$existed_params = array(
 			'where' => array(
 				'u_id' => $params['u_id']
@@ -39,7 +42,9 @@ class User {
 			return;
 		}
 		$params['id'] = '';
-		return PDO_MySQL::insert(self::TABLE_NAME, $params);
+		$result = $tmp_pdo->insert(self::TABLE_NAME, $params);
+		$tmp_pdo = null;
+		return $result;
 	}
 
 	/**
@@ -48,10 +53,13 @@ class User {
 	 */
 	public static function addMulti($data)
 	{
+		$tmp_pdo = PDO_MySQL::getInstance();
 		$fields = array('u_id', 'u_name', 'address', 'img_url', 'business', 'gender', 'education', 'major', 'description',
 			'followees_count', 'followers_count', 'special_count', 'follow_topic_count', 'pv_count', 'approval_count', 'thank_count',
 			'ask_count', 'answer_count', 'started_count', 'public_edit_count', 'article_count');
-		return PDO_MySQL::insertAll(self::TABLE_NAME, $fields, $data);
+		$result = $tmp_pdo->insertAll(self::TABLE_NAME, $fields, $data);
+		$tmp_pdo = null;
+		return $result;
 	}
 
 	/**
@@ -61,13 +69,15 @@ class User {
 	 */
 	public static function info($u_id)
 	{
+		$tmp_pdo = PDO_MySQL::getInstance();
 		$params = array(
 			'where' => array(
 				'u_id' => $u_id
 			)
 		);
 
-		$result = PDO_MySQL::getOneRow(self::TABLE_NAME, $params);
+		$result = $tmp_pdo->getOneRow(self::TABLE_NAME, $params);
+		$tmp_pdo = null;
 		return $result;
 	}
 
@@ -77,8 +87,11 @@ class User {
 	 */
 	public static function addFollowList($user_follow_list)
 	{
+		$tmp_pdo = PDO_MySQL::getInstance();
 		$fields = array('id', 'u_id', 'u_follow_id', 'u_follow_name');
-		return PDO_MySQL::insertAll(self::FOLLOW_TABLE_NAME, $fields, $user_follow_list);
+		$result = $tmp_pdo->insertAll(self::FOLLOW_TABLE_NAME, $fields, $user_follow_list);
+		$tmp_pdo = null;
+		return $result;
 	}
 
 	/**
@@ -89,6 +102,7 @@ class User {
 	 */
 	public static function getFollowUserList($u_id, $page)
 	{
+		$tmp_pdo = PDO_MySQL::getInstance();
 		$params = array(
 			'where' => array(
 				'u_id' => $u_id,
@@ -99,8 +113,9 @@ class User {
 		{
 			$params['offset'] = ($page - 1) * 20;
 		}
-
-		return PDO_MySQL::getAll(self::FOLLOW_TABLE_NAME, $params);
+		$result = $tmp_pdo->getAll(self::FOLLOW_TABLE_NAME, $params);
+		$tmp_pdo = null;
+		return $result;
 	}
 
 	/**
@@ -110,12 +125,14 @@ class User {
 	 */
 	public static function getFollowCount($u_id)
 	{
+		$tmp_pdo = PDO_MySQL::getInstance();
 		$params = array(
 			'where' => array(
 				'u_id' => $u_id
 			)
 		);
-
-		return PDO_MySQL::count(self::FOLLOW_TABLE_NAME, $params);
+		$result = $tmp_pdo->count(self::FOLLOW_TABLE_NAME, $params);
+		$tmp_pdo = null;
+		return $result;
 	}
 }
