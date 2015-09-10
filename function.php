@@ -3,7 +3,7 @@
  * @Author: hector
  * @Date:   2015-08-22 10:19:54
  * @Last Modified by:   huhuaquan
- * @Last Modified time: 2015-09-09 18:19:59
+ * @Last Modified time: 2015-09-10 19:02:33
  */
 /**
  * [getUserInfo 获取用户]
@@ -23,7 +23,8 @@ function getUserInfo($result)
 
 	preg_match('#<img class="avatar avatar-l" alt=".*?" src="(.*?)" srcset=".*?" />#', $result, $out);
 	$img_url_tmp = empty($out[1]) ? '' : $out[1];
-	$user['img_url'] = getImg($img_url_tmp, $user['u_id']);
+	// $user['img_url'] = getImg($img_url_tmp, $user['u_id']);
+	$user['img_url'] = $img_url_tmp;
 
 	preg_match('#<span class="business item" title=["|\'](.*?)["|\']>#', $result, $out);
 	$user['business'] = empty($out[1]) ? '' : $out[1];
@@ -76,6 +77,7 @@ function getUserInfo($result)
 	preg_match('#公共编辑\s<span class="num">(.*?)</span>#', $result, $out);
 	$user['public_edit_count'] = empty($out[1]) ? 0 : $out[1];
 
+	$user['duplicate_count'] = 1;
 
 	return $user;
 }
@@ -117,6 +119,7 @@ function dealUserInfo($user_list, $u_id)
 {
 	$info_list = array();
 	$new_user_id_list = array();
+	$new_user_list = array();
 	if (empty($user_list))
 	{
 		return array();
@@ -124,11 +127,22 @@ function dealUserInfo($user_list, $u_id)
 	foreach ($user_list as $user)
 	{
 		preg_match('#<h2 class="zm-list-content-title"><a data-tip=".*?" href="http://www.zhihu.com/people/(.*?)" class="zg-link" title="(.*?)">#', $user, $out);
-		$new_user_id_list[] = $out[1];
-		$info = array('', $u_id, empty($out[1]) ? '' : $out[1], empty($out[2]) ? '' : $out[2]);
-		array_push($info_list, $info);
+		$params = array(
+			'where' => array(
+				'u_id' => $out[1]
+			)
+		);
+		if (!User::existed($params, 'user'))
+		{
+			$new_user_id_list[] = $out[1];
+			$info = array('', $u_id, empty($out[1]) ? '' : $out[1], empty($out[2]) ? '' : $out[2]);
+			array_push($info_list, $info);
+		}
 	}
-	$new_user_list = Curl::getMultiUser($new_user_id_list);
+	if (!empty($new_user_id_list))
+	{
+		$new_user_list = Curl::getMultiUser($new_user_id_list);
+	}
 	$result = array($new_user_list, $info_list);
 	usleep(1);
 	return $result;
@@ -146,6 +160,12 @@ function getOnePageUserList($result, $u_id, $user_type = 'followees', $count)
 		array_push($follow_user_list, $user);
 	}
 	User::addMulti($user_list);
+	if (!empty($follow_user_list))
+	{
+		echo "adding " . count($follow_user_list) . " {$u_id}'s followee user ..\n";
+		User::addFollowList($follow_user_list);
+		echo "adding " . count($follow_user_list) . " {$u_id}'s followee user done..\n";
+	}
 	return $follow_user_list;
 }
 
@@ -162,6 +182,7 @@ function getUserList($result, $u_id, $user_type = 'followees', $count)
 {
 	$following_users = array();
 	$more_user_list = array();
+	$tmp_following_users = array();
 	if ($count <= 20)
 	{
 		$following_users = getOnePageUserList($result, $u_id, $user_type, $count);
@@ -172,6 +193,7 @@ function getUserList($result, $u_id, $user_type = 'followees', $count)
     	$_xsrf = empty($out[1]) ? '' : trim($out[1]);
     	preg_match('#<div class="zh-general-list clearfix" data-init="(.*?)">#', $result, $out);
     	$url_params = empty($out[1]) ? '' : json_decode(html_entity_decode($out[1]), true);
+    	echo "request $u_id more $count user...\n";
     	if (!empty($_xsrf) && !empty($url_params) && is_array($url_params))
     	{
 			$params = $url_params['params'];
@@ -186,16 +208,54 @@ function getUserList($result, $u_id, $user_type = 'followees', $count)
 				);
 				$more_user = Curl::request('POST', 'http://www.zhihu.com/node/' . $url_params['nodename'], $post_fields);
 				$more_user_result = json_decode($more_user, true);
+				if (empty($more_user_result['msg']) || !is_array($more_user_result['msg']))
+				{
+					echo "get $u_id follower page $page failed...\n";
+					continue;
+				}
 				$more_user_tmp_list = $more_user_result['msg'];
 				$result = dealUserInfo($more_user_tmp_list, $u_id);
 				if (empty($result))
 				{
+					echo "empty more user {$url_params['nodename']} with u_id  $u_id \n";
 					continue;
 				}
 				$more_user_list = array_merge($more_user_list, $result[0]);
+				$tmp_following_users = array_merge($tmp_following_users, $result[1]);
+				//每获取到200条插入一次
+				if ($page%10 == 0)
+				{
+					if (!empty($more_user_list))
+					{
+						$tmp_count = count($more_user_list);
+						echo "adding more $tmp_count user with u_id  $u_id...\n";
+						User::addMulti($more_user_list);
+						echo "adding more {$tmp_count} user done with u_id $u_id...\n";
+					}
+					if (!empty($tmp_following_users))
+					{
+						echo "adding " . count($tmp_following_users) . " followee user  with u_id $u_id..\n";
+						User::addFollowList($tmp_following_users);
+						echo "adding " . count($tmp_following_users) . " followee user done  with u_id $u_id..\n";
+					}
+					$more_user_list = array();
+					$tmp_following_users = array();
+				}
 				$following_users = array_merge($following_users, $result[1]);
 			}
-			User::addMulti($more_user_list);
+			if (!empty($more_user_list))
+			{
+				echo "adding rest user with u_id $u_id...\n";
+				$last_id = User::addMulti($more_user_list);
+				echo "adding rest user done with u_id $u_id and last_id $last_id...\n";
+			}
+			if (!empty($tmp_following_users))
+			{
+				echo "adding " . count($tmp_following_users) . " {$u_id}'s followee user ..\n";
+				User::addFollowList($tmp_following_users);
+				echo "adding " . count($tmp_following_users) . " {$u_id}'s followee user done..\n";
+			}
+			echo "request more $count user done with u_id $u_id...\n";
 		}
 		else
 		{

@@ -3,7 +3,14 @@
  * @Author: huhuaquan
  * @Date:   2015-06-08 17:45:18
  * @Last Modified by:   huhuaquan
- * @Last Modified time: 2015-09-09 18:19:24
+ * @Last Modified time: 2015-09-10 19:02:58
+ */
+<?php
+/**
+ * @Author: huhuaquan
+ * @Date:   2015-06-08 17:45:18
+ * @Last Modified by:   huhuaquan
+ * @Last Modified time: 2015-08-24 18:33:38
  */
 class PDO_MySQL {
 	private $pdo;
@@ -250,7 +257,7 @@ class PDO_MySQL {
 	* @param 	$datas 		array 	插入的数据
 	* @return 				int 	插入的最后一行的ID
 	*/
-	public function insertAll($table, $fields, $datas)
+	public function insertAll($table, $fields, $datas, $check_duplicate = 0)
 	{
 		$columns = array();
 		foreach ($fields as $field)
@@ -276,12 +283,16 @@ class PDO_MySQL {
 		}
 		$places = implode(',', $places);
 		$insert_sql = implode(" ", array(
-			'REPLACE INTO',
+			'INSERT INTO',
 			'zh_' . $table,
 			$columns,
 			'VALUES',
 			$places
 		));
+		if ($check_duplicate)
+		{
+			$insert_sql .= 'ON DUPLICATE KEY UPDATE duplicate_count=VALUES(duplicate_count) + 1';
+		}
 		$stmt = $this->pdo->prepare($insert_sql);
 		$this->bindMulti($params, $stmt);
 		$result = $stmt->execute();

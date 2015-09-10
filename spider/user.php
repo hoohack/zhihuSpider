@@ -3,7 +3,7 @@
  * @Author: huhuaquan
  * @Date:   2015-08-21 15:25:27
  * @Last Modified by:   huhuaquan
- * @Last Modified time: 2015-09-09 14:31:15
+ * @Last Modified time: 2015-09-10 19:01:48
  */
 class User {
 
@@ -56,8 +56,8 @@ class User {
 		$tmp_pdo = PDO_MySQL::getInstance();
 		$fields = array('u_id', 'u_name', 'address', 'img_url', 'business', 'gender', 'education', 'major', 'description',
 			'followees_count', 'followers_count', 'special_count', 'follow_topic_count', 'pv_count', 'approval_count', 'thank_count',
-			'ask_count', 'answer_count', 'started_count', 'public_edit_count', 'article_count');
-		$result = $tmp_pdo->insertAll(self::TABLE_NAME, $fields, $data);
+			'ask_count', 'answer_count', 'started_count', 'public_edit_count', 'article_count', 'duplicate_count');
+		$result = $tmp_pdo->insertAll(self::TABLE_NAME, $fields, $data, 1);
 		$tmp_pdo = null;
 		return $result;
 	}
@@ -87,10 +87,12 @@ class User {
 	 */
 	public static function addFollowList($user_follow_list)
 	{
+		echo "adding follower...\n";
 		$tmp_pdo = PDO_MySQL::getInstance();
 		$fields = array('id', 'u_id', 'u_follow_id', 'u_follow_name');
 		$result = $tmp_pdo->insertAll(self::FOLLOW_TABLE_NAME, $fields, $user_follow_list);
 		$tmp_pdo = null;
+		echo "adding follower done...\n";
 		return $result;
 	}
 
@@ -119,11 +121,11 @@ class User {
 	}
 
 	/**
-	 * [getFollowCount 返回用户关注人数量]
+	 * [getFolloweeCount 返回用户关注人数量]
 	 * @param  [type] $u_id [description]
 	 * @return [type]       [description]
 	 */
-	public static function getFollowCount($u_id)
+	public static function getFolloweeCount($u_id)
 	{
 		$tmp_pdo = PDO_MySQL::getInstance();
 		$params = array(
@@ -132,6 +134,14 @@ class User {
 			)
 		);
 		$result = $tmp_pdo->count(self::FOLLOW_TABLE_NAME, $params);
+		$tmp_pdo = null;
+		return $result;
+	}
+
+	public static function totalCount()
+	{
+		$tmp_pdo = PDO_MySQL::getInstance();
+		$result = $tmp_pdo->count(self::TABLE_NAME, array());
 		$tmp_pdo = null;
 		return $result;
 	}
