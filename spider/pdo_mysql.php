@@ -3,7 +3,7 @@
  * @Author: huhuaquan
  * @Date:   2015-06-08 17:45:18
  * @Last Modified by:   huhuaquan
- * @Last Modified time: 2015-09-11 14:49:01
+ * @Last Modified time: 2015-09-11 16:47:22
  */
 class PDO_MySQL {
 	private $pdo;

@@ -3,7 +3,7 @@
  * @Author: huhuaquan
  * @Date:   2015-08-21 15:25:27
  * @Last Modified by:   huhuaquan
- * @Last Modified time: 2015-09-11 14:48:23
+ * @Last Modified time: 2015-09-11 16:46:14
  */
 class User {
 
@@ -77,6 +77,10 @@ class User {
 		);
 
 		$result = $tmp_pdo->getOneRow(self::TABLE_NAME, $params);
+		if (empty($result))
+		{
+			echo "--------user $u_id not existed--------\n";
+		}
 		$tmp_pdo = null;
 		return $result;
 	}
@@ -89,7 +93,7 @@ class User {
 	{
 		echo "--------start adding user follow relation--------\n";
 		$tmp_pdo = PDO_MySQL::getInstance();
-		$fields = array('id', 'u_id', 'u_follow_id', 'u_follow_name');
+		$fields = array('id', 'u_id', 'u_name', 'u_follow_id', 'u_follow_name');
 		$result = $tmp_pdo->insertAll(self::FOLLOW_TABLE_NAME, $fields, $user_follow_list, 1);
 		$tmp_pdo = null;
 		echo "--------add user follow relation done--------\n";

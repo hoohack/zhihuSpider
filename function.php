@@ -3,14 +3,7 @@
  * @Author: hector
  * @Date:   2015-08-22 10:19:54
  * @Last Modified by:   huhuaquan
- * @Last Modified time: 2015-09-11 14:48:01
- */
-<?php
-/**
- * @Author: hector
- * @Date:   2015-08-22 10:19:54
- * @Last Modified by:   huhuaquan
- * @Last Modified time: 2015-09-11 11:21:52
+ * @Last Modified time: 2015-09-11 16:46:46
  */
 /**
  * [getUserInfo 获取用户]
@@ -122,7 +115,7 @@ function getImg($url, $u_id)
  * @param  [type] $user_list [description]
  * @return [type]            [description]
  */
-function dealUserInfo($user_list, $u_id)
+function dealUserInfo($user_list, $u_id, $user_type = 'followees', $u_name)
 {
 	$info_list = array();
 	$new_user_id_list = array();
@@ -143,7 +136,14 @@ function dealUserInfo($user_list, $u_id)
 		{
 			$new_user_id_list[] = $out[1];
 		}
-		$info = array('', $u_id, empty($out[1]) ? '' : $out[1], empty($out[2]) ? '' : $out[2]);
+		if ($user_type == 'followees')
+		{
+			$info = array('', $u_id, $u_name, empty($out[1]) ? '' : $out[1], empty($out[2]) ? '' : $out[2]);
+		}
+		else
+		{
+			$info = array('', empty($out[1]) ? '' : $out[1], $u_id, empty($out[2]) ? '' : $out[2], $u_name);	
+		}
 		array_push($info_list, $info);
 	}
 	if (!empty($new_user_id_list))
@@ -163,15 +163,23 @@ function dealUserInfo($user_list, $u_id)
  * @param  [type] $count     [description]
  * @return [type]            [description]
  */
-function getOnePageUserList($result, $u_id, $user_type = 'followees', $count)
+function getOnePageUserList($result, $u_id, $user_type = 'followees', $count, $u_name)
 {
 	$follow_user_list = array();
 	$user_list = array();
 	preg_match_all('#<h2 class="zm-list-content-title"><a data-tip=".*?" href="http://www.zhihu.com/people/(.*?)" class="zg-link" title="(.*?)">#', $result, $out);
+
 	$user_list = Curl::getMultiUser($out[1]);
 	for ($i = 0; $i < $count; $i++)
 	{
-		$user = array('', $u_id, empty($out[1][$i]) ? '' : $out[1][$i], empty($out[2][$i]) ? '' : $out[2][$i]);
+		if ($user_type == 'followees')
+		{
+			$user = array('', $u_id, $u_name, empty($out[1][$i]) ? '' : $out[1][$i], empty($out[2][$i]) ? '' : $out[2][$i]);
+		}
+		else
+		{
+			$user = array('', empty($out[1][$i]) ? '' : $out[1][$i], empty($out[2][$i]) ? '' : $out[2][$i],  $u_id, $u_name);
+		}
 		array_push($follow_user_list, $user);
 	}
 	User::addMulti($user_list);
@@ -198,9 +206,12 @@ function getUserList($u_id, $user_type = 'followees', $count)
 	$more_user_list = array();
 	$tmp_following_users = array();
 	$result = Curl::request('GET', 'http://www.zhihu.com/people/' . $u_id . '/' . $user_type);
+	preg_match('#<a class="name" href="/people/(.*?)">(.*?)</a>#', $result, $u_out);
+	$u_name = empty($u_out[2]) ? '' : $u_out[2];
+
 	if ($count <= 20)
 	{
-		$following_users = getOnePageUserList($result, $u_id, $user_type, $count);
+		$following_users = getOnePageUserList($result, $u_id, $user_type, $count, $u_name);
 	}
 	else
 	{
@@ -230,7 +241,7 @@ function getUserList($u_id, $user_type = 'followees', $count)
 					continue;
 				}
 				$more_user_tmp_list = $more_user_result['msg'];
-				$result = dealUserInfo($more_user_tmp_list, $u_id);
+				$result = dealUserInfo($more_user_tmp_list, $u_id, $user_type, $u_name);
 				if (empty($result))
 				{
 					echo "--------empty more user {$url_params['nodename']} with u_id  $u_id--------\n";
@@ -299,7 +310,7 @@ function saveUserInfo($tmp_u_id)
 	{
 		echo "--------found new user {$tmp_u_id}--------\n";
 		echo "--------start getting {$tmp_u_id} info--------\n";
-		$result = Curl::request('GET', 'http://www.zhihu.com/people/' . $tmp_u_id);
+		$result = Curl::request('GET', 'http://www.zhihu.com/people/' . $tmp_u_id . '/followees');
 		if (empty($result))
 		{
 			$i = 0;

@@ -3,7 +3,7 @@
  * @Author: huhuaquan
  * @Date:   2015-08-26 11:38:18
  * @Last Modified by:   huhuaquan
- * @Last Modified time: 2015-09-11 14:50:56
+ * @Last Modified time: 2015-09-11 16:45:44
  */
 require_once './spider/user.php';
 require_once './function.php';
@@ -29,14 +29,8 @@ while (1)
 		echo "--------done--------\n";
 		break;
 	}
-	else if ($total <= $max_connect)
-	{
-		$current_count = $total;
-	}
-	else
-	{
-		$current_count = $max_connect;
-	}
+	$current_count = ($total <= $max_connect) ? $total : $max_connect;
+
 	for ($i = 1; $i <= $current_count; ++$i)
 	{
 		$pid = pcntl_fork();
@@ -52,14 +46,12 @@ while (1)
 			$tmp_u_id = $tmp_redis->lpop('request_queue');
 			if (empty($tmp_redis->zscore('already_get_queue', $tmp_u_id)))
 			{
-				//保存用户信息
 				saveUserInfo($tmp_u_id);
 
 				$user_info = User::info($tmp_u_id);
 				$user_followees_count = User::getFolloweeCount($tmp_u_id);
 				$user_followers_count = User::getFollowerCount($tmp_u_id);
 
-				//获取关注了的用户
 				if ($user_info['followees_count'] != $user_followees_count)
 				{
 					echo "--------start getting {$tmp_u_id}'s " . $user_info['followees_count'] . " followees user list--------\n";
@@ -68,7 +60,7 @@ while (1)
 					{
 						foreach ($followee_users as $user)
 						{
-							$tmp_redis->lpush('request_queue', $user[2]);
+							$tmp_redis->lpush('request_queue', $user[3]);
 						}
 					}
 					else
@@ -78,7 +70,6 @@ while (1)
 					echo "--------get " . count($followee_users) . " followees users done--------\n";
 				}
 
-				//获取关注者
 				if ($user_info['followers_count'] != $user_followers_count)
 				{
 					echo "--------start getting {$tmp_u_id}'s " . $user_info['followers_count'] . " followers user list--------\n";
@@ -87,7 +78,7 @@ while (1)
 					{
 						foreach ($follower_users as $user)
 						{
-							$tmp_redis->lpush('request_queue', $user[2]);
+							$tmp_redis->lpush('request_queue', $user[1]);
 						}
 					}
 					else
@@ -97,10 +88,8 @@ while (1)
 					echo "--------get " . count($follower_users) . " followers users done--------\n";
 				}
 
-				//保存用户到已获取的redis队列中
 				$tmp_redis->zadd('already_get_queue', 1, $tmp_u_id);
 				$tmp_redis->close();
-				
 				$endTime = microtime();
 				$startTime = explode(' ', $startTime);
 		        $endTime = explode(' ', $endTime);
