@@ -3,7 +3,14 @@
  * @Author: hector
  * @Date:   2015-08-22 10:19:54
  * @Last Modified by:   huhuaquan
- * @Last Modified time: 2015-09-11 11:06:08
+ * @Last Modified time: 2015-09-11 14:48:01
+ */
+<?php
+/**
+ * @Author: hector
+ * @Date:   2015-08-22 10:19:54
+ * @Last Modified by:   huhuaquan
+ * @Last Modified time: 2015-09-11 11:21:52
  */
 /**
  * [getUserInfo 获取用户]
@@ -170,9 +177,9 @@ function getOnePageUserList($result, $u_id, $user_type = 'followees', $count)
 	User::addMulti($user_list);
 	if (!empty($follow_user_list))
 	{
-		echo "adding " . count($follow_user_list) . " {$u_id}'s followee user ..\n";
+		echo "--------adding " . count($follow_user_list) . " {$u_id}'s $user_type user--------\n";
 		User::addFollowList($follow_user_list);
-		echo "adding " . count($follow_user_list) . " {$u_id}'s followee user done..\n";
+		echo "--------adding " . count($follow_user_list) . " {$u_id}'s $user_type user done--------\n";
 	}
 	return $follow_user_list;
 }
@@ -185,11 +192,12 @@ function getOnePageUserList($result, $u_id, $user_type = 'followees', $count)
  * @param  integer $count     [description]
  * @return [type]             [description]
  */
-function getUserList($result, $u_id, $user_type = 'followees', $count)
+function getUserList($u_id, $user_type = 'followees', $count)
 {
 	$following_users = array();
 	$more_user_list = array();
 	$tmp_following_users = array();
+	$result = Curl::request('GET', 'http://www.zhihu.com/people/' . $u_id . '/' . $user_type);
 	if ($count <= 20)
 	{
 		$following_users = getOnePageUserList($result, $u_id, $user_type, $count);
@@ -236,13 +244,13 @@ function getUserList($result, $u_id, $user_type = 'followees', $count)
 					if (!empty($more_user_list))
 					{
 						$tmp_count = count($more_user_list);
-						echo "start adding more new $tmp_count user with u_id  $u_id--------\n";
+						echo "--------start adding more new $tmp_count user with u_id  $u_id--------\n";
 						User::addMulti($more_user_list);
-						echo "add more new {$tmp_count} user done with u_id $u_id--------\n";
+						echo "--------add more new {$tmp_count} user done with u_id $u_id--------\n";
 					}
 					if (!empty($tmp_following_users))
 					{
-						echo "-------- start adding " . count($tmp_following_users) . " $user_type user  with u_id $u_id--------\n";
+						echo "--------start adding " . count($tmp_following_users) . " $user_type user  with u_id $u_id--------\n";
 						User::addFollowList($tmp_following_users);
 						echo "--------add " . count($tmp_following_users) . " $user_type user done  with u_id $u_id--------\n";
 					}
@@ -259,7 +267,7 @@ function getUserList($result, $u_id, $user_type = 'followees', $count)
 			}
 			if (!empty($tmp_following_users))
 			{
-				echo "start adding rest " . count($tmp_following_users) . " {$u_id}'s $user_type user--------\n";
+				echo "--------start adding rest " . count($tmp_following_users) . " {$u_id}'s $user_type user--------\n";
 				User::addFollowList($tmp_following_users);
 				echo "--------add " . count($tmp_following_users) . " {$u_id}'s $user_type user done--------\n";
 			}
@@ -272,4 +280,41 @@ function getUserList($result, $u_id, $user_type = 'followees', $count)
 	}
 
 	return $following_users;
+}
+
+
+/**
+ * [saveUserInfo 保存用户信息]
+ * @param  [type]  $tmp_u_id    [用户ID]
+ * @return [type]             [description]
+ */
+function saveUserInfo($tmp_u_id)
+{
+	$params = array(
+		'where' => array(
+			'u_id' => $tmp_u_id
+		)
+	);
+	if (!User::existed($params, 'user'))
+	{
+		echo "--------found new user {$tmp_u_id}--------\n";
+		echo "--------start getting {$tmp_u_id} info--------\n";
+		$result = Curl::request('GET', 'http://www.zhihu.com/people/' . $tmp_u_id);
+		if (empty($result))
+		{
+			$i = 0;
+			while(empty($result))
+			{
+				echo "--------empty result.try get $i time--------\n";
+				$result = Curl::request('GET', 'http://www.zhihu.com/people/' . $tmp_u_id);
+				if (++$i == 5)
+				{
+					exit($i);
+				}
+			}
+		}
+		$current_user = getUserInfo($result);
+		User::add($current_user);
+		echo "--------get {$tmp_u_id} info done--------\n";
+	}
 }
