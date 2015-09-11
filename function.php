@@ -3,7 +3,7 @@
  * @Author: hector
  * @Date:   2015-08-22 10:19:54
  * @Last Modified by:   huhuaquan
- * @Last Modified time: 2015-09-10 19:02:33
+ * @Last Modified time: 2015-09-11 09:48:03
  */
 /**
  * [getUserInfo 获取用户]
@@ -135,9 +135,9 @@ function dealUserInfo($user_list, $u_id)
 		if (!User::existed($params, 'user'))
 		{
 			$new_user_id_list[] = $out[1];
-			$info = array('', $u_id, empty($out[1]) ? '' : $out[1], empty($out[2]) ? '' : $out[2]);
-			array_push($info_list, $info);
 		}
+		$info = array('', $u_id, empty($out[1]) ? '' : $out[1], empty($out[2]) ? '' : $out[2]);
+		array_push($info_list, $info);
 	}
 	if (!empty($new_user_id_list))
 	{
