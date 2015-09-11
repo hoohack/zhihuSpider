@@ -3,7 +3,7 @@
  * @Author: hector
  * @Date:   2015-08-22 10:19:54
  * @Last Modified by:   huhuaquan
- * @Last Modified time: 2015-09-11 09:48:03
+ * @Last Modified time: 2015-09-11 11:06:08
  */
 /**
  * [getUserInfo 获取用户]
@@ -148,6 +148,14 @@ function dealUserInfo($user_list, $u_id)
 	return $result;
 }
 
+/**
+ * [getOnePageUserList 如果关注的用户只有一页的处理]
+ * @param  [type] $result    [description]
+ * @param  [type] $u_id      [description]
+ * @param  string $user_type [description]
+ * @param  [type] $count     [description]
+ * @return [type]            [description]
+ */
 function getOnePageUserList($result, $u_id, $user_type = 'followees', $count)
 {
 	$follow_user_list = array();
@@ -171,7 +179,6 @@ function getOnePageUserList($result, $u_id, $user_type = 'followees', $count)
 
 /**
  * [getUserList 返回用户列表]
- * @param  [type]  $curl      [description]
  * @param  [type]  $result    [description]
  * @param  [type]  $u_id  	  [description]
  * @param  string  $user_type [description]
@@ -193,7 +200,8 @@ function getUserList($result, $u_id, $user_type = 'followees', $count)
     	$_xsrf = empty($out[1]) ? '' : trim($out[1]);
     	preg_match('#<div class="zh-general-list clearfix" data-init="(.*?)">#', $result, $out);
     	$url_params = empty($out[1]) ? '' : json_decode(html_entity_decode($out[1]), true);
-    	echo "request $u_id more $count user...\n";
+
+    	echo "--------start requesting $u_id more $count user--------\n";
     	if (!empty($_xsrf) && !empty($url_params) && is_array($url_params))
     	{
 			$params = $url_params['params'];
@@ -210,14 +218,14 @@ function getUserList($result, $u_id, $user_type = 'followees', $count)
 				$more_user_result = json_decode($more_user, true);
 				if (empty($more_user_result['msg']) || !is_array($more_user_result['msg']))
 				{
-					echo "get $u_id follower page $page failed...\n";
+					echo "--------get $u_id $user_type page $page failed--------\n";
 					continue;
 				}
 				$more_user_tmp_list = $more_user_result['msg'];
 				$result = dealUserInfo($more_user_tmp_list, $u_id);
 				if (empty($result))
 				{
-					echo "empty more user {$url_params['nodename']} with u_id  $u_id \n";
+					echo "--------empty more user {$url_params['nodename']} with u_id  $u_id--------\n";
 					continue;
 				}
 				$more_user_list = array_merge($more_user_list, $result[0]);
@@ -228,15 +236,15 @@ function getUserList($result, $u_id, $user_type = 'followees', $count)
 					if (!empty($more_user_list))
 					{
 						$tmp_count = count($more_user_list);
-						echo "adding more $tmp_count user with u_id  $u_id...\n";
+						echo "start adding more new $tmp_count user with u_id  $u_id--------\n";
 						User::addMulti($more_user_list);
-						echo "adding more {$tmp_count} user done with u_id $u_id...\n";
+						echo "add more new {$tmp_count} user done with u_id $u_id--------\n";
 					}
 					if (!empty($tmp_following_users))
 					{
-						echo "adding " . count($tmp_following_users) . " followee user  with u_id $u_id..\n";
+						echo "-------- start adding " . count($tmp_following_users) . " $user_type user  with u_id $u_id--------\n";
 						User::addFollowList($tmp_following_users);
-						echo "adding " . count($tmp_following_users) . " followee user done  with u_id $u_id..\n";
+						echo "--------add " . count($tmp_following_users) . " $user_type user done  with u_id $u_id--------\n";
 					}
 					$more_user_list = array();
 					$tmp_following_users = array();
@@ -245,17 +253,17 @@ function getUserList($result, $u_id, $user_type = 'followees', $count)
 			}
 			if (!empty($more_user_list))
 			{
-				echo "adding rest user with u_id $u_id...\n";
+				echo "--------start adding rest " . count($more_user_list) . " user with u_id $u_id--------\n";
 				$last_id = User::addMulti($more_user_list);
-				echo "adding rest user done with u_id $u_id and last_id $last_id...\n";
+				echo "--------add rest" . count($more_user_list) . " user done with u_id $u_id and last_id $last_id--------\n";
 			}
 			if (!empty($tmp_following_users))
 			{
-				echo "adding " . count($tmp_following_users) . " {$u_id}'s followee user ..\n";
+				echo "start adding rest " . count($tmp_following_users) . " {$u_id}'s $user_type user--------\n";
 				User::addFollowList($tmp_following_users);
-				echo "adding " . count($tmp_following_users) . " {$u_id}'s followee user done..\n";
+				echo "--------add " . count($tmp_following_users) . " {$u_id}'s $user_type user done--------\n";
 			}
-			echo "request more $count user done with u_id $u_id...\n";
+			echo "--------request more $count user done with u_id $u_id--------\n";
 		}
 		else
 		{

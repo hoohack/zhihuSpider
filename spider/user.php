@@ -3,7 +3,7 @@
  * @Author: huhuaquan
  * @Date:   2015-08-21 15:25:27
  * @Last Modified by:   huhuaquan
- * @Last Modified time: 2015-09-10 19:01:48
+ * @Last Modified time: 2015-09-11 11:01:56
  */
 class User {
 
@@ -87,12 +87,12 @@ class User {
 	 */
 	public static function addFollowList($user_follow_list)
 	{
-		echo "adding follower...\n";
+		echo "--------start adding follower--------\n";
 		$tmp_pdo = PDO_MySQL::getInstance();
 		$fields = array('id', 'u_id', 'u_follow_id', 'u_follow_name');
 		$result = $tmp_pdo->insertAll(self::FOLLOW_TABLE_NAME, $fields, $user_follow_list);
 		$tmp_pdo = null;
-		echo "adding follower done...\n";
+		echo "--------add follower done--------\n";
 		return $result;
 	}
 
@@ -138,6 +138,10 @@ class User {
 		return $result;
 	}
 
+	/**
+	 * [totalCount 返回用户总数量]
+	 * @return [type] [description]
+	 */
 	public static function totalCount()
 	{
 		$tmp_pdo = PDO_MySQL::getInstance();

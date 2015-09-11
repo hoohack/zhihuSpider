@@ -3,7 +3,7 @@
  * @Author: huhuaquan
  * @Date:   2015-08-26 11:38:18
  * @Last Modified by:   huhuaquan
- * @Last Modified time: 2015-09-10 19:01:19
+ * @Last Modified time: 2015-09-11 11:06:58
  */
 require_once './spider/user.php';
 require_once './function.php';
@@ -15,7 +15,6 @@ $user_cookie = '_za=a41e1b8b-517a-4fea-9465-88e8c80ba17e;q_cl=3198dbc291fa40d7b7
 //redis instance
 $redis = PRedis::getInstance();
 $redis->flushdb();
-// exit;
 if ($redis->llen('request_queue') == 0)
 {
 	$redis->lpush('request_queue', 'mora-hu');
@@ -23,11 +22,11 @@ if ($redis->llen('request_queue') == 0)
 $max_connect = 2;
 while (1)
 {
-	echo "begin get user info...\n";
+	echo "--------begin get user info--------\n";
 	$total = $redis->llen('request_queue');
 	if ($total == 0)
 	{
-		echo "-----done...-----\n";
+		echo "--------done--------\n";
 		break;
 	}
 	else if ($total <= $max_connect)
@@ -43,7 +42,7 @@ while (1)
 		$pid = pcntl_fork();
 		if ($pid == -1)
 		{
-			echo "-----fork child process failed...-----\n";
+			echo "--------fork child process failed--------\n";
 			exit(0);
 		}
 		if (!$pid)
@@ -53,14 +52,14 @@ while (1)
 			$tmp_u_id = $tmp_redis->lpop('request_queue');
 			if (empty($tmp_redis->zscore('already_get_queue', $tmp_u_id)))
 			{
-				echo "begin getting {$tmp_u_id} follower list\n";
+				echo "--------start getting {$tmp_u_id} follower list--------\n";
 				$result = Curl::request('GET', 'http://www.zhihu.com/people/' . $tmp_u_id . '/followees');
 				if (empty($result))
 				{
 					$i = 0;
 					while(empty($result))
 					{
-						echo "empty...try get $i time\n";
+						echo "--------empty result.try get $i time--------\n";
 						$result = Curl::request('GET', 'http://www.zhihu.com/people/' . $tmp_u_id . '/followees');
 						if (++$i == 5)
 						{
@@ -68,7 +67,7 @@ while (1)
 						}
 					}
 				}
-				echo "getting {$tmp_u_id} info done...\n";
+				echo "--------get {$tmp_u_id} info done--------\n";
 				$params = array(
 					'where' => array(
 						'u_id' => $tmp_u_id
@@ -76,7 +75,7 @@ while (1)
 				);
 				if (!User::existed($params, 'user'))
 				{
-					echo "new user {$tmp_u_id}...\n";
+					echo "--------found new user {$tmp_u_id}--------\n";
 					$current_user = getUserInfo($result);
 					User::add($current_user);
 				}
@@ -86,7 +85,7 @@ while (1)
 
 				if ($user_info['followees_count'] != $user_followees_count)
 				{
-					echo "getting " . $user_info['followees_count'] . " followee user with u_id $tmp_u_id..\n";
+					echo "--------start getting " . $user_info['followees_count'] . " followee user with u_id $tmp_u_id--------\n";
 					$followee_users = getUserList($result, $tmp_u_id, 'followees', $user_info['followees_count']);
 					if (!empty($followee_users))
 					{
@@ -97,9 +96,9 @@ while (1)
 					}
 					else
 					{
-						echo "empty followee_users\n";
+						echo "--------empty followee_users--------\n";
 					}
-					echo "add new " . count($followee_users) . " users done \n";
+					echo "--------get " . count($followee_users) . " users done--------\n";
 				}
 
 				$tmp_redis->zadd('already_get_queue', 1, $tmp_u_id);
@@ -109,11 +108,11 @@ while (1)
 		        $endTime = explode(' ', $endTime);
 		        $total_time = $endTime[0] - $startTime[0] + $endTime[1] - $startTime[1];
 		        $timecost = sprintf("%.2f",$total_time);
-		        echo "const  " . $timecost . " second with $tmp_u_id ...\n";
+		        echo "--------const  " . $timecost . " second on $tmp_u_id--------\n";
 			}
 			else
 			{
-				echo "user $tmp_u_id info already get...\n";
+				echo "--------user $tmp_u_id info and followee and follower already get--------\n";
 			}
 			exit($i);
 		}
@@ -126,6 +125,6 @@ while (1)
 		{
 			echo "yes";
 		}
-		echo "$status finished\n";
+		echo "--------$status finished--------\n";
 	}
 }
