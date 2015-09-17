@@ -3,7 +3,7 @@
  * @Author: hector
  * @Date:   2015-08-22 10:19:54
  * @Last Modified by:   huhuaquan
- * @Last Modified time: 2015-09-11 16:46:46
+ * @Last Modified time: 2015-09-17 11:35:07
  */
 /**
  * [getUserInfo 获取用户]
@@ -163,7 +163,7 @@ function dealUserInfo($user_list, $u_id, $user_type = 'followees', $u_name)
  * @param  [type] $count     [description]
  * @return [type]            [description]
  */
-function getOnePageUserList($result, $u_id, $user_type = 'followees', $count, $u_name)
+function getOnePageUserList($result, $u_id, $user_type = 'followees', $count, $u_name, $op_type)
 {
 	$follow_user_list = array();
 	$user_list = array();
@@ -183,7 +183,7 @@ function getOnePageUserList($result, $u_id, $user_type = 'followees', $count, $u
 		array_push($follow_user_list, $user);
 	}
 	User::addMulti($user_list);
-	if (!empty($follow_user_list))
+	if (!empty($follow_user_list) && ($op_type == 2))
 	{
 		echo "--------adding " . count($follow_user_list) . " {$u_id}'s $user_type user--------\n";
 		User::addFollowList($follow_user_list);
@@ -200,7 +200,7 @@ function getOnePageUserList($result, $u_id, $user_type = 'followees', $count, $u
  * @param  integer $count     [description]
  * @return [type]             [description]
  */
-function getUserList($u_id, $user_type = 'followees', $count)
+function getUserList($u_id, $user_type = 'followees', $count, $op_type)
 {
 	$following_users = array();
 	$more_user_list = array();
@@ -211,7 +211,7 @@ function getUserList($u_id, $user_type = 'followees', $count)
 
 	if ($count <= 20)
 	{
-		$following_users = getOnePageUserList($result, $u_id, $user_type, $count, $u_name);
+		$following_users = getOnePageUserList($result, $u_id, $user_type, $count, $u_name, $op_type);
 	}
 	else
 	{
@@ -259,7 +259,7 @@ function getUserList($u_id, $user_type = 'followees', $count)
 						User::addMulti($more_user_list);
 						echo "--------add more new {$tmp_count} user done with u_id $u_id--------\n";
 					}
-					if (!empty($tmp_following_users))
+					if (!empty($tmp_following_users) && ($op_type == 2))
 					{
 						echo "--------start adding " . count($tmp_following_users) . " $user_type user  with u_id $u_id--------\n";
 						User::addFollowList($tmp_following_users);
@@ -276,7 +276,7 @@ function getUserList($u_id, $user_type = 'followees', $count)
 				$last_id = User::addMulti($more_user_list);
 				echo "--------add rest" . count($more_user_list) . " user done with u_id $u_id and last_id $last_id--------\n";
 			}
-			if (!empty($tmp_following_users))
+			if (!empty($tmp_following_users) && ($op_type == 2))
 			{
 				echo "--------start adding rest " . count($tmp_following_users) . " {$u_id}'s $user_type user--------\n";
 				User::addFollowList($tmp_following_users);
@@ -328,4 +328,33 @@ function saveUserInfo($tmp_u_id)
 		User::add($current_user);
 		echo "--------get {$tmp_u_id} info done--------\n";
 	}
+}
+
+/**
+ * [saveUserInfo 更新用户信息]
+ * @param  [type]  $tmp_u_id    [用户ID]
+ * @return [type]             [description]
+ */
+function updateUserInfo($tmp_u_id)
+{
+	echo "--------update user {$tmp_u_id}--------\n";
+	echo "--------start updating {$tmp_u_id} info--------\n";
+	$result = Curl::request('GET', 'http://www.zhihu.com/people/' . $tmp_u_id . '/followees');
+	if (empty($result))
+	{
+		$i = 0;
+		while(empty($result))
+		{
+			echo "--------empty result.try get $i time--------\n";
+			$result = Curl::request('GET', 'http://www.zhihu.com/people/' . $tmp_u_id);
+			if (++$i == 5)
+			{
+				exit($i);
+			}
+		}
+	}
+	$current_user = getUserInfo($result);
+	unset($current_user['u_id']);
+	User::update($current_user, $tmp_u_id);
+	echo "--------update {$tmp_u_id} info done--------\n";
 }

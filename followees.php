@@ -3,7 +3,7 @@
  * @Author: hector
  * @Date:   2015-08-22 10:19:02
  * @Last Modified by:   huhuaquan
- * @Last Modified time: 2015-08-24 17:47:35
+ * @Last Modified time: 2015-09-16 18:45:19
  */
 
 require_once './spider/curl.php';
@@ -25,6 +25,7 @@ $params = array(
 
 $current_user = array();
 $result = Curl::request('GET', 'http://www.zhihu.com/people/' . $u_id . '/followees');
+echo $result;exit;
 if (!User::existed($params, 'user'))
 {
 	$current_user = getUserInfo($result);

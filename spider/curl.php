@@ -3,12 +3,12 @@
  * @Author: huhuaquan
  * @Date:   2015-08-10 18:08:43
  * @Last Modified by:   huhuaquan
- * @Last Modified time: 2015-09-11 10:53:13
+ * @Last Modified time: 2015-09-16 18:50:37
  */
 require_once './function.php';
 class Curl {
 
-	private static $user_cookie = '_za=a41e1b8b-517a-4fea-9465-88e8c80ba17e;q_cl=3198dbc291fa40d7b717f9a4dd5ec90e|1439792872000|1439792872000;_xsrf=981ffd949fbc70e73cc4bb2559243ac8;cap_id="YmViMDk0YTdjMjUyNDc4MjhmOWU5MDkyMTg3NWRlNGY=|1439792872|7eb10c44aead609ab6e63f3eb2b5856149076942";z_c0="QUFEQTRZbzZBQUFYQUFBQVlRSlZUZjhMLVZYNnBhUDBYYzJIOFJtUGs2aFlianFRU3NRR3hRPT0=|1439792895|4f033f6e2f99a39b152a59c32496dfc954cbe6fd";__utma=51854390.888606616.1439792875.1439792875.1439891906.2;__utmb=51854390.2.10.1439891906;__utmc=51854390;__utmt=1;__utmv=51854390.100-1|2=registration_date=20141017=1^3=entry_date=20141017=1__utmz=51854390.1439891906.2.2.utmcsr=google|utmccn=(organic)|utmcmd=organic|utmctr=(not%20provided)';
+	private static $user_cookie = '_za=9940ad75-d123-421d-bba5-4e247da577a0;q_cl=e6713b82d4284d16a5c8373af3e76e65|1442399751000|1442399751000;_xsrf=fcecded8440d03b53b3935b566ec741b;cap_id="ZTA3ZjNlOTk3Y2ZjNDJjNmIwM2E2N2IzYTIxYTBjMTE=|1442399751|8447d695435144053a49c4069eb49f3e0dccbf20";z_c0="QUFEQTRZbzZBQUFYQUFBQVlRSlZUUnJUSUZZX1UyNUpkampQRElzSENQSzlhQ2s5UDNyOUF3PT0=|1442399770|ed42f54477ac6a770f4ceb7bb4da8e8afdcd11d6";__utma=51854390.1336096764.1442399738.1442399738.1442400123.2;__utmb=51854390.4.10.1442399738;__utmc=51854390;__utmt=1;__utmv=51854390.100-1|2=registration_date=20141017=1^3=entry_date=20141017=1;__utmz=51854390.1442399738.1.1.utmcsr=zhihu.com|utmccn=(referral)|utmcmd=referral|utmcct=/people/disinfeqt;unlock_ticket="QUFEQTRZbzZBQUFYQUFBQVlRSlZUU0pOLVZYMnlmSGFwVlpjQWNZUHpCc0xXNXljajBkdnpRPT0=|1442399770|46e23553f528de4b2b97c31cf5f5cdd9ddf3a77d"';
 
 	/**
 	 * [request 执行一次curl请求]
