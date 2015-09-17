@@ -3,8 +3,9 @@
  * @Author: huhuaquan
  * @Date:   2015-08-26 11:38:18
  * @Last Modified by:   huhuaquan
- * @Last Modified time: 2015-09-17 11:35:59
+ * @Last Modified time: 2015-09-17 11:38:17
  */
+//获取用户信息和用户关注信息
 require_once './spider/user.php';
 require_once './function.php';
 require_once './spider/curl.php';
