@@ -5,13 +5,17 @@ Just for fun.
 
 ##运行环境
 
->linux cli
+> linux cli
 
->PHP version >= 5.6
+> PHP version >= 5.6
 
->pcntl extension require
+> pcntl 扩展
 
->curl extension require
+> curl 扩展
+
+> pdo 扩展 
+
+> predis
 
 ##使用方法
-创建数据库zhihu，创建数据表，在命令行下运行stole_user_cyclically.php文件。
+创建数据库zhihu，创建数据表zh_user。建表文件在./sql/zh_user.sql。在命令行下运行get_user_info.php文件。

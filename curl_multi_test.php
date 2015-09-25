@@ -37,6 +37,7 @@
         while ($done = curl_multi_info_read($master)) {
         	// get the info and content returned on the request
             $info = curl_getinfo($done['handle']);
+            var_dump($info);
             $output = curl_multi_getcontent($done['handle']);
             if (empty(getGoodsName($output)))
             {

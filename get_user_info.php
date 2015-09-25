@@ -22,6 +22,7 @@ if ($redis->llen('request_queue') == 0)
 {
 	$redis->lpush('request_queue', 'mora-hu');
 }
+//最大进程数
 $max_connect = 2;
 
 //设置log文件目录
