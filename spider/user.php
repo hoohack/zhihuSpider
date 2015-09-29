@@ -171,4 +171,71 @@ class User {
 		$tmp_pdo = null;
 		return $result;
 	}
+
+	public static function update($user_data, $u_id)
+	{
+		$tmp_pdo = PDO_MySQL::getInstance();
+		$where = array(
+			'where' => array(
+				'u_id' => $u_id
+			)
+		);
+		$result = $tmp_pdo->update(self::TABLE_NAME, $where, $user_data);
+		$tmp_pdo = null;
+		return $result;
+	}
+
+	/**
+	 * [addressCountList 根据地区统计]
+	 * @return [type] [description]
+	 */
+	public static function addressCountList()
+	{
+		$tmp_pdo = PDO_MySQL::getInstance();
+		$conditions = array(
+			'fields' => 'address, count(*) as address_count',
+			'sort' => array('address_count' => 0),
+			'group_by' => 'address',
+			'limit' => 11
+		);
+		$result = $tmp_pdo->getAll(self::TABLE_NAME, $conditions);
+		$tmp_pdo = null;
+		return $result;
+	}
+
+	/**
+	 * [majorCountList 根据专业统计数量]
+	 * @return [type] [description]
+	 */
+	public static function majorCountList()
+	{
+		$tmp_pdo = PDO_MySQL::getInstance();
+		$conditions = array(
+			'fields' => 'major, count(*) as major_count',
+			'sort' => array('major_count' => 0),
+			'group_by' => 'major',
+			'limit' => 11
+		);
+		$result = $tmp_pdo->getAll(self::TABLE_NAME, $conditions);
+		$tmp_pdo = null;
+		return $result;
+	}
+
+	/**
+	 * [businessCountList 根据行业统计数量]
+	 * @return [type] [description]
+	 */
+	public static function businessCountList()
+	{
+		$tmp_pdo = PDO_MySQL::getInstance();
+		$conditions = array(
+			'fields' => 'business, count(*) as business_count',
+			'sort' => array('business_count' => 0),
+			'group_by' => 'business',
+			'limit' => 11
+		);
+		$result = $tmp_pdo->getAll(self::TABLE_NAME, $conditions);
+		$tmp_pdo = null;
+		return $result;
+	}
 }
