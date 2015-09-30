@@ -9,6 +9,8 @@ Just for fun.
 
 > PHP version >= 5.6
 
+> MySQL version >= 5.5
+
 > pcntl 扩展
 
 > curl 扩展
