@@ -3,7 +3,7 @@
  * @Author: huhuaquan
  * @Date:   2015-08-21 15:25:27
  * @Last Modified by:   huhuaquan
- * @Last Modified time: 2015-09-11 16:46:14
+ * @Last Modified time: 2016-04-19 18:31:16
  */
 class User {
 

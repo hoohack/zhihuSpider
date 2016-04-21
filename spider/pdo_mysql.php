@@ -3,7 +3,7 @@
  * @Author: huhuaquan
  * @Date:   2015-06-08 17:45:18
  * @Last Modified by:   huhuaquan
- * @Last Modified time: 2015-09-11 16:47:22
+ * @Last Modified time: 2016-04-20 10:03:15
  */
 class PDO_MySQL {
 	private $pdo;
@@ -276,16 +276,12 @@ class PDO_MySQL {
 		}
 		$places = implode(',', $places);
 		$insert_sql = implode(" ", array(
-			'INSERT INTO',
+			'INSERT IGNORE INTO',
 			'zh_' . $table,
 			$columns,
 			'VALUES',
 			$places
 		));
-		if ($check_duplicate)
-		{
-			$insert_sql .= 'ON DUPLICATE KEY UPDATE duplicate_count=VALUES(duplicate_count) + 1';
-		}
 		$stmt = $this->pdo->prepare($insert_sql);
 		$this->bindMulti($params, $stmt);
 		$result = $stmt->execute();

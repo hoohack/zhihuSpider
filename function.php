@@ -3,7 +3,7 @@
  * @Author: hector
  * @Date:   2015-08-22 10:19:54
  * @Last Modified by:   huhuaquan
- * @Last Modified time: 2015-09-17 11:35:07
+ * @Last Modified time: 2016-04-19 18:32:10
  */
 /**
  * [getUserInfo 获取用户]
@@ -101,7 +101,7 @@ function getImg($url, $u_id)
     $context_options = array(  
 		'http' =>  
 		array(
-			'header' => "Referer:http://www.zhihu.com",  
+			'header' => "Referer:https://www.zhihu.com",  
 	));
 	  
 	$context = stream_context_create($context_options);  
@@ -126,7 +126,7 @@ function dealUserInfo($user_list, $u_id, $user_type = 'followees', $u_name)
 	}
 	foreach ($user_list as $user)
 	{
-		preg_match('#<h2 class="zm-list-content-title"><a data-tip=".*?" href="http://www.zhihu.com/people/(.*?)" class="zg-link" title="(.*?)">#', $user, $out);
+		preg_match('#<h2 class="zm-list-content-title"><a data-tip=".*?" href="https://www.zhihu.com/people/(.*?)" class="zg-link" title="(.*?)">#', $user, $out);
 		$params = array(
 			'where' => array(
 				'u_id' => $out[1]
@@ -167,7 +167,7 @@ function getOnePageUserList($result, $u_id, $user_type = 'followees', $count, $u
 {
 	$follow_user_list = array();
 	$user_list = array();
-	preg_match_all('#<h2 class="zm-list-content-title"><a data-tip=".*?" href="http://www.zhihu.com/people/(.*?)" class="zg-link" title="(.*?)">#', $result, $out);
+	preg_match_all('#<h2 class="zm-list-content-title"><a data-tip=".*?" href="https://www.zhihu.com/people/(.*?)" class="zg-link" title="(.*?)">#', $result, $out);
 
 	$user_list = Curl::getMultiUser($out[1]);
 	for ($i = 0; $i < $count; $i++)
@@ -205,7 +205,7 @@ function getUserList($u_id, $user_type = 'followees', $count, $op_type)
 	$following_users = array();
 	$more_user_list = array();
 	$tmp_following_users = array();
-	$result = Curl::request('GET', 'http://www.zhihu.com/people/' . $u_id . '/' . $user_type);
+	$result = Curl::request('GET', 'https://www.zhihu.com/people/' . $u_id . '/' . $user_type);
 	preg_match('#<a class="name" href="/people/(.*?)">(.*?)</a>#', $result, $u_out);
 	$u_name = empty($u_out[2]) ? '' : $u_out[2];
 
@@ -233,7 +233,7 @@ function getUserList($u_id, $user_type = 'followees', $count, $op_type)
 					'params' =>  json_encode($params),
 					'_xsrf' => $_xsrf
 				);
-				$more_user = Curl::request('POST', 'http://www.zhihu.com/node/' . $url_params['nodename'], $post_fields);
+				$more_user = Curl::request('POST', 'https://www.zhihu.com/node/' . $url_params['nodename'], $post_fields);
 				$more_user_result = json_decode($more_user, true);
 				if (empty($more_user_result['msg']) || !is_array($more_user_result['msg']))
 				{
@@ -310,14 +310,14 @@ function saveUserInfo($tmp_u_id)
 	{
 		echo "--------found new user {$tmp_u_id}--------\n";
 		echo "--------start getting {$tmp_u_id} info--------\n";
-		$result = Curl::request('GET', 'http://www.zhihu.com/people/' . $tmp_u_id . '/followees');
+		$result = Curl::request('GET', 'https://www.zhihu.com/people/' . $tmp_u_id . '/followees');
 		if (empty($result))
 		{
 			$i = 0;
 			while(empty($result))
 			{
 				echo "--------empty result.try get $i time--------\n";
-				$result = Curl::request('GET', 'http://www.zhihu.com/people/' . $tmp_u_id);
+				$result = Curl::request('GET', 'https://www.zhihu.com/people/' . $tmp_u_id);
 				if (++$i == 5)
 				{
 					exit($i);
@@ -339,14 +339,14 @@ function updateUserInfo($tmp_u_id)
 {
 	echo "--------update user {$tmp_u_id}--------\n";
 	echo "--------start updating {$tmp_u_id} info--------\n";
-	$result = Curl::request('GET', 'http://www.zhihu.com/people/' . $tmp_u_id . '/followees');
+	$result = Curl::request('GET', 'https://www.zhihu.com/people/' . $tmp_u_id . '/followees');
 	if (empty($result))
 	{
 		$i = 0;
 		while(empty($result))
 		{
 			echo "--------empty result.try get $i time--------\n";
-			$result = Curl::request('GET', 'http://www.zhihu.com/people/' . $tmp_u_id);
+			$result = Curl::request('GET', 'https://www.zhihu.com/people/' . $tmp_u_id);
 			if (++$i == 5)
 			{
 				exit($i);

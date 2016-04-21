@@ -3,12 +3,12 @@
  * @Author: huhuaquan
  * @Date:   2015-08-10 18:08:43
  * @Last Modified by:   huhuaquan
- * @Last Modified time: 2015-09-17 11:39:05
+ * @Last Modified time: 2016-04-19 18:12:58
  */
 require_once './function.php';
 class Curl {
 
-	private static $user_cookie = '_za=9940ad75-d123-421d-bba5-4e247da577a0;q_cl=e6713b82d4284d16a5c8373af3e76e65|1442399751000|1442399751000;_xsrf=fcecded8440d03b53b3935b566ec741b;cap_id="ZTA3ZjNlOTk3Y2ZjNDJjNmIwM2E2N2IzYTIxYTBjMTE=|1442399751|8447d695435144053a49c4069eb49f3e0dccbf20";z_c0="QUFEQTRZbzZBQUFYQUFBQVlRSlZUUnJUSUZZX1UyNUpkampQRElzSENQSzlhQ2s5UDNyOUF3PT0=|1442399770|ed42f54477ac6a770f4ceb7bb4da8e8afdcd11d6";__utma=51854390.1336096764.1442399738.1442399738.1442400123.2;__utmb=51854390.4.10.1442399738;__utmc=51854390;__utmt=1;__utmv=51854390.100-1|2=registration_date=20141017=1^3=entry_date=20141017=1;__utmz=51854390.1442399738.1.1.utmcsr=zhihu.com|utmccn=(referral)|utmcmd=referral|utmcct=/people/disinfeqt;unlock_ticket="QUFEQTRZbzZBQUFYQUFBQVlRSlZUU0pOLVZYMnlmSGFwVlpjQWNZUHpCc0xXNXljajBkdnpRPT0=|1442399770|46e23553f528de4b2b97c31cf5f5cdd9ddf3a77d"';
+	private static $user_cookie = '_zap=06c40d9b-e783-45c3-875b-b5def3690777;d_c0="AGAAuXZTsAmPTiftYaWT02M1JeAkw0ewo9w=|1459231862";l_cap_id="NjE4YmY5ZGQ3NjU2NDhjNTlhMjgzOTU1OGU0MGQ4MGU=|1459325472|e1d55d466d4c3dc9d05f87cf3560f8181536a634";_za=a2889ef9-c598-4e96-8ab5-9ca0a9f42e7e;q_cl=21fd5f4d6c3541aa873163af7517ab8d|1459231862000|1459231862000;_xsrf=2954cb4a20c90fd5d8827725902192ae;cap_id="ZTgxZjk5MTJkNDc4NGYwY2E4OWRiYzllZGUxMDcxMDE=|1459325472|44db7054701fc0b9653cfa63d7692305dd1605e2";z_c0="QUFEQTRZbzZBQUFYQUFBQVlRSlZUVElYSTFjVmkxZGpUR19IWkJJZFBpQk5jZkgybU13bGRnPT0=|1459325490|82fb5c6295ee4f3802dd9cba337f2660743f5422";__utma=51854390.1528321902.1460969239.1461053456.1461059182.4;__utmb=51854390.2.10.1461059182;__utmc=51854390;__utmt=1;__utmv=51854390.100-1|2=registration_date=20141017=1^3=entry_date=20141017=1;__utmz=51854390.1460969239.1.1.utmcsr=google|utmccn=(organic)|utmcmd=organic|utmctr=(not%20provided);login="Y2ExZTc4OTYwMDkxNDI5MWFiNmY3NTlkNmI1MDhmNTk=|1459325490|2956a0f521ea9e6337fcb110e266f9d1a558492b";';
 
 	/**
 	 * [request 执行一次curl请求]
