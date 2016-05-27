@@ -3,7 +3,7 @@
  * @Author: hector
  * @Date:   2015-08-22 10:19:54
  * @Last Modified by:   huhuaquan
- * @Last Modified time: 2016-04-19 18:32:10
+ * @Last Modified time: 2016-05-27 18:43:03
  */
 /**
  * [getUserInfo 获取用户]
@@ -14,14 +14,14 @@ function getUserInfo($result)
 {
 	$user = array();
 
-	preg_match('#<a class="name" href="/people/(.*?)">(.*?)</a>#', $result, $out);
-	$user['u_id'] = empty($out[1]) ? '' : $out[1];
-	$user['u_name'] = empty($out[2]) ? '' : $out[2];
+	preg_match_all('#<a class="name" href="/people\/(.*)">(.*)</a>#', $result, $out);
+	$user['u_id'] = empty($out[1]) ? '' : $out[1][0];
+	$user['u_name'] = empty($out[2]) ? '' : $out[2][0];
 
 	preg_match('#<span class="location item" title=["|\'](.*?)["|\']>#', $result, $out);
 	$user['address'] = empty($out[1]) ? '' : $out[1];
 
-	preg_match('#<img class="avatar avatar-l" alt=".*?" src="(.*?)" srcset=".*?" />#', $result, $out);
+	preg_match('#<img class="Avatar Avatar--l" src="(.*?)" srcset=".*?" alt=".*?" />#', $result, $out);
 	$img_url_tmp = empty($out[1]) ? '' : $out[1];
 	// $user['img_url'] = getImg($img_url_tmp, $user['u_id']);
 	$user['img_url'] = $img_url_tmp;
@@ -41,10 +41,10 @@ function getUserInfo($result)
 	preg_match('#<span class="content">\s(.*?)\s</span>#s', $result, $out);
 	$user['description'] = empty($out[1]) ? '' : trim(strip_tags($out[1]));
 
-	preg_match('#<span class="zg-gray-normal">关注了</span><br />\s<strong>(.*?)</strong><label> 人</label>#', $result, $out);
+	preg_match('#<span class="zg-gray-normal">关注了</span><br>\s<strong>(.*?)</strong><label> 人</label>#', $result, $out);
 	$user['followees_count'] = empty($out[1]) ? 0 : $out[1];
 
-	preg_match('#<span class="zg-gray-normal">关注者</span><br />\s<strong>(.*?)</strong><label> 人</label>#', $result, $out);
+	preg_match('#<span class="zg-gray-normal">关注者</span><br>\s<strong>(.*?)</strong><label> 人</label>#', $result, $out);
 	$user['followers_count'] = empty($out[1]) ? 0 : $out[1];
 
 	preg_match('#<strong>(.*?) 个专栏</strong>#', $result, $out);
@@ -65,7 +65,7 @@ function getUserInfo($result)
 	preg_match('#回答\s<span class="num">(.*?)</span>#', $result, $out);
 	$user['answer_count'] = empty($out[1]) ? 0 : $out[1];
 
-	preg_match('#专栏文章\s<span class="num">(.*?)</span>#', $result, $out);
+	preg_match('#文章\s<span class="num">(.*?)</span>#', $result, $out);
 	$user['article_count'] = empty($out[1]) ? 0 : $out[1];
 
 	preg_match('#个人主页被 <strong>(.*?)</strong> 人浏览#', $result, $out);
@@ -78,7 +78,6 @@ function getUserInfo($result)
 	$user['public_edit_count'] = empty($out[1]) ? 0 : $out[1];
 
 	$user['duplicate_count'] = 1;
-
 	return $user;
 }
 

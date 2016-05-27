@@ -3,7 +3,7 @@
  * @Author: huhuaquan
  * @Date:   2015-09-17 11:16:05
  * @Last Modified by:   huhuaquan
- * @Last Modified time: 2016-04-21 15:19:12
+ * @Last Modified time: 2016-05-27 18:42:56
  */
 //获取用户信息脚本
 
@@ -13,7 +13,6 @@ require_once './spider/curl.php';
 require_once './spider/pdo_mysql.php';
 require_once './spider/predis.php';
 require_once './spider/log.php';
-
 //redis instance
 $redis = PRedis::getInstance();
 $redis->flushdb();
