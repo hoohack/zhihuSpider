@@ -1,6 +1,8 @@
 # zhihuSpider
 Just for fun.
 
+文章介绍：[【php爬虫】百万级别知乎用户数据爬取与分析](http://www.hoohack.me/2015/09/30/php-spider-millons-of-zhihu-user-analyze)
+
 一个抓取知乎用户数据的应用。
 
 ##运行环境
